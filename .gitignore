@@ -10,4 +10,6 @@ pew-images
 statista-images
 model
 /datasets/fix_datasets.ipynb
-DenseNet
+/DenseNet/code/statista/
+/models/concadia-code/paper_runs_perf/
+/DenseNet/paper_runs_perf/
