@@ -1,0 +1,11 @@
+.idea
+concadia-*
+hci-*
+*.zip
+venv/
+*.jsonl
+*.tsv
+.ipynb_checkpoints
+pew-images
+statista-images
+datasets
