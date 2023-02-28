@@ -8,3 +8,5 @@ venv/
 .ipynb_checkpoints
 pew-images
 statista-images
+model
+/datasets/fix_datasets.ipynb
