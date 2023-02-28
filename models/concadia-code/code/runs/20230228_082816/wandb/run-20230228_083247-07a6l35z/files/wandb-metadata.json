@@ -1,0 +1,50 @@
+{
+    "os": "macOS-10.15.7-x86_64-i386-64bit",
+    "python": "3.8.2",
+    "heartbeatAt": "2023-02-28T16:32:47.905667",
+    "startedAt": "2023-02-28T16:32:47.328179",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--image_encoder_type",
+        "resnet",
+        "--context_encoder_type",
+        "roberta",
+        "caption",
+        "caption",
+        "none"
+    ],
+    "state": "running",
+    "program": "train.py",
+    "codePath": "models/concadia-code/code/train.py",
+    "git": {
+        "remote": "https://github.com/akd13/CS399-NLP.git",
+        "commit": "7f68064d89b89ff4e70a0bfda96e204d1b0b3334"
+    },
+    "email": "nanni.naik@gmail.com",
+    "root": "/Users/nanditanaik/CS399-NLP",
+    "host": "DNa1d2448.SUNet",
+    "username": "nanditanaik",
+    "executable": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3",
+    "cpu_count": 4,
+    "cpu_count_logical": 8,
+    "cpu_freq": {
+        "current": 1400,
+        "min": 1400,
+        "max": 1400
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 1400,
+            "min": 1400,
+            "max": 1400
+        }
+    ],
+    "disk": {
+        "total": 233.46913528442383,
+        "used": 10.445484161376953
+    },
+    "memory": {
+        "total": 8.0
+    }
+}
