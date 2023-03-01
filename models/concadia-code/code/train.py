@@ -528,6 +528,9 @@ def validate(val_loader, encoder, decoder, criterion, epoch, context_tokenizer):
                 'hypothesis_greedy': {'text': hyp_from_scratch}
             }
             for hypothesis_type in ['hypothesis', 'hypothesis_greedy']:
+                print("Ref ", ref)
+                print("Hypothesis ", datapoint[hypothesis_type]['text'])
+
                 metrics = nlgeval.compute_metrics(
                     [[ref]], [datapoint[hypothesis_type]['text']])
                 for metric in ['Bleu_2', 'Bleu_4', 'ROUGE_L']:
@@ -580,7 +583,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=35,
                         help='Number of epochs.')
     parser.add_argument('--data_dir', type=str,
-                        default='../../../datasets/pew/parsed_data/',
+                        default='../../../datasets/all/parsed_data/',
                         help="Where data for model training and eval is stored")
     parser.add_argument('--output_dir', type=str,
                         default='.',
@@ -589,8 +592,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Data parameters
-    data_folder = os.path.join(args.data_dir, args.label_cond + '_' + args.context_cond +
-                               '_' + 'randompew')  # folder with data files saved by create_input_files.py
+    data_folder = os.path.join(args.data_dir, args.context_cond +
+                                'all')  # folder with data files saved by create_input_files.py
     data_name = 'wikipedia_1_min_word_freq'  # base name shared by data files
 
     if args.debug:

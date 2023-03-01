@@ -12,7 +12,7 @@ if __name__ == '__main__':
 	parser.add_argument('context', type=str,
 		choices=['context', 'none'],
         help='the type of text that the model receives as additional context to inform generation')
-	parser.add_argument('--dataset', type=str, choices=['pew', 'statista', 'concadia', 'hci'], required = True,
+	parser.add_argument('--dataset', type=str, choices=['all', 'pew', 'statista', 'concadia', 'hci'], required = True,
         help='what should be randomized for a baseline condition')
 	parser.add_argument('--root_dir', type=str, 
 		required=True, help='where the raw dataset is stored')
