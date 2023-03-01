@@ -104,17 +104,17 @@ def create_input_files(root_dir, json_path, image_folder, labels_per_image, cont
         # Update word frequency
         # Word frequency is updated according to all text input (label + potential context)
 
-        word_freq.update(img['description']['tokens'])
+        word_freq.update(img['context']['tokens'])
         word_freq.update(img['caption']['tokens'])
 
-        if len(img['description']['tokens']) <= max_len:
-            labels.append(img['description']['tokens'])
+        if len(img['context']['tokens']) <= max_len:
+            labels.append(img['context']['tokens'])
         if len(img['caption']['tokens']) <= max_len:
             labels.append(img['caption']['tokens'])
 
         if context != "none":
             contexts.append(img['caption']['raw'])
-            contexts.append(img['description']['raw'])
+            contexts.append(img['context']['raw'])
 
         if len(labels) == 0:
             continue
