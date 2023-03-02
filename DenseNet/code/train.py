@@ -78,7 +78,6 @@ fine_tune_encoder = False  # fine-tune encoder?
 
 save_checkpoint_frequency = 5
 
-
 def run_training():
     """
     Training and validation.
@@ -86,6 +85,9 @@ def run_training():
     global word_map, rev_word_map
 
     # Read word map
+    print("Data folder ", data_folder)
+    print("Data name ", data_name)
+
     word_map_file = os.path.join(data_folder, 'WORDMAP_' + data_name + '.json')
     with open(word_map_file, 'r') as j:
         word_map = json.load(j)
@@ -204,14 +206,14 @@ def run_training():
         write_csv(run_dir, args.label_cond, args.context_cond, args.randomized,
                   blank_img, args.blank_context, "val", epoch, val_metrics)
 
-        wandb.log(format_log_metrics(train_metrics, val_metrics,
-                  val_metrics_greedy_decoding, epoch))
+        # wandb.log(format_log_metrics(train_metrics, val_metrics,
+        #           val_metrics_greedy_decoding, epoch))
 
     if start_epoch > best_epoch:
         print('Current resumed run does not have a new best checkpoint.')
     else:
-        wandb.run.summary['best_epoch'] = best_epoch
-        wandb.run.summary['best_val_cider'] = best_cider
+        # wandb.run.summary['best_epoch'] = best_epoch
+        # wandb.run.summary['best_val_cider'] = best_cider
         # Save best checkpoint
         save_checkpoint(checkpoint_dir, best_epoch, 0, best_encoder, best_decoder,
                         best_encoder_optimizer, best_decoder_optimizer, best_cider, checkpoint_type='best')
@@ -406,6 +408,7 @@ def validate(val_loader, encoder, decoder, criterion, epoch, context_tokenizer):
             imgs = imgs.to(device)
             labs = labs.to(device)
             lablens = lablens.to(device)
+            alllabs = alllabs.to(device)
             # COMMENT OUT
             if not args.context_cond == "none":
                 tokenized_contexts = context_tokenizer(
@@ -438,7 +441,7 @@ def validate(val_loader, encoder, decoder, criterion, epoch, context_tokenizer):
                 _ = pack_padded_sequence(
                     targets, decode_lengths, batch_first=True)
 
-            # Calculate lossçç
+            # Calculate loss
             raw_loss = criterion(scores, targets)
 
             # Add doubly stochastic attention regularization
@@ -533,6 +536,9 @@ def validate(val_loader, encoder, decoder, criterion, epoch, context_tokenizer):
                 'hypothesis_greedy': {'text': hyp_from_scratch}
             }
             for hypothesis_type in ['hypothesis', 'hypothesis_greedy']:
+                print("Ref ", ref)
+                print("Hypothesis ", datapoint[hypothesis_type]['text'])
+
                 metrics = nlgeval.compute_metrics(
                     [[ref]], [datapoint[hypothesis_type]['text']])
                 for metric in ['Bleu_2', 'Bleu_4', 'ROUGE_L']:
@@ -594,8 +600,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Data parameters
-    data_folder = os.path.join(args.data_dir+'/parsed_data/', args.randomized+args.data_dir)  # folder with data files saved by create_input_files.py
-    data_name = 'all_1_min_word_freq'  # base name shared by data files
+    data_folder = os.path.join(args.data_dir, args.context_cond +
+                                'all')  # folder with data files saved by create_input_files.py
+    data_name = 'wikipedia_1_min_word_freq'  # base name shared by data files
 
     if args.debug:
         # dryrun
