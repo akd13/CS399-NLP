@@ -591,7 +591,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=35,
                         help='Number of epochs.')
     parser.add_argument('--data_dir', type=str,
-                        default='../../../datasets/all/parsed_data/',
+                        default='../../datasets/parsed_data/',
                         help="Where data for model training and eval is stored")
     parser.add_argument('--output_dir', type=str,
                         default='.',
@@ -601,8 +601,8 @@ if __name__ == '__main__':
 
     # Data parameters
     data_folder = os.path.join(args.data_dir, args.context_cond +
-                                'all')  # folder with data files saved by create_input_files.py
-    data_name = 'wikipedia_1_min_word_freq'  # base name shared by data files
+                                'images')  # folder with data files saved by create_input_files.py
+    data_name = 'images_1_min_word_freq'  # base name shared by data files
 
     if args.debug:
         # dryrun
