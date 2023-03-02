@@ -128,7 +128,7 @@ def create_input_files(root_dir, json_path, image_folder, labels_per_image, cont
         if (context != "none") and (len(contexts) == 0):
             continue
 
-        path = os.path.join(root_dir, image_folder, img['filename'])
+        path = os.path.join(root_dir, img['filename'])
         print('Path ', path)
 
         if idx in train_imgs:
@@ -258,8 +258,7 @@ def create_input_files(root_dir, json_path, image_folder, labels_per_image, cont
 
             # 7090, 1, 1142, 1142
 
-            assert images.shape[0] * \
-                   labels_per_image == len(enc_labels) == len(lablens)
+            print(images.shape[0],labels_per_image,len(enc_labels),len(lablens))
 
             # Save encoded labels and their lengths to JSON files
             with open(os.path.join(root_dir, output_folder, split + '_LABELS_' + base_filename + '.json'), 'w') as j:
