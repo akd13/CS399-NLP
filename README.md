@@ -1,3 +1,9 @@
+# Set up env
+1. Navigate to the root directory of the project `cd CS224N/CS399-NLP/`
+1. Create a virtual environment - `pip install virtualenv`
+2. Activate the virtual environment - `source venv/bin/activate`
+3. Install the requirements - `pip install -r requirements.txt`
+
 # Data Collection
 This project is to collect datasets for the task of generating descriptions for charts and graphs. 
 The datasets are collected from the following sources:
