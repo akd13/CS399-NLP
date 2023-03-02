@@ -578,8 +578,8 @@ if __name__ == '__main__':
                         help='Output type.')
     parser.add_argument('context_cond', type=str, choices=['description', 'caption', 'context'],
                         help='Context type (what to input aside from img).')
-    parser.add_argument('randomized', type=str, choices=['img', 'description', 'caption', 'context', 'none'],
-                        help='Type of input to randomize.')
+    parser.add_argument('randomized', type=str, choices=['pew', 'description', 'caption', 'context', 'none'],
+                        help='Type of dataset we are training on.')
     parser.add_argument('--image_encoder_type', type=str, choices=['resnet', 'densenet'], default='resnet',
                         help='Image encoder type.')
     parser.add_argument('--context_encoder_type', type=str, choices=['bert', 'roberta'], default='bert',
@@ -591,10 +591,10 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=35,
                         help='Number of epochs.')
     parser.add_argument('--data_dir', type=str,
-                        default='/home/ubuntu/s3-drive/data/concadia_xu2015_data',
+                        default='../../../datasets/all/parsed_data/',
                         help="Where data for model training and eval is stored")
     parser.add_argument('--output_dir', type=str,
-                        default='/home/ubuntu/s3-drive/',
+                        default='.',
                         help="Where to output run metrics and checkpoints")
 
     args = parser.parse_args()
@@ -644,6 +644,8 @@ if __name__ == '__main__':
         'alpha_c': str(alpha_c),
         'fine_tune_encoder': str(fine_tune_encoder),
     }
+
+    print("Model specs", specs_dict)
 
     with open(os.path.join(run_dir, 'specs.json'), 'w') as json_file:
         json.dump(specs_dict, json_file, indent=4)
