@@ -32,7 +32,7 @@ def create_input_files(root_dir, json_path, image_folder, labels_per_image, cont
     :param max_len: don't sample labels longer than this length
     """
 
-    dataset = "all"
+    dataset = "images"
 
     # Read JSON
     with open(os.path.join(root_dir, json_path), 'r') as j:
@@ -109,15 +109,19 @@ def create_input_files(root_dir, json_path, image_folder, labels_per_image, cont
 
         word_freq.update(img['description']['tokens'])
         word_freq.update(img['caption']['tokens'])
+        word_freq.update(img['context']['tokens'])
 
         if len(img['description']['tokens']) <= max_len:
             labels.append(img['description']['tokens'])
         if len(img['caption']['tokens']) <= max_len:
             labels.append(img['caption']['tokens'])
+        if len(img['context']['tokens']) <= max_len:
+            labels.append(img['context']['tokens'])
 
         if context != "none":
             contexts.append(img['caption']['raw'])
             contexts.append(img['description']['raw'])
+            contexts.append(img['context']['raw'])
 
         if len(labels) == 0:
             continue

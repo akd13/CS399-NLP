@@ -10,9 +10,9 @@ if __name__ == '__main__':
 #	parser.add_argument('label', type=str, choices=['description', 'caption'],
  #       help='whether the model is optimized to generate descriptions or captions')
 	parser.add_argument('context', type=str,
-		choices=['caption','context', 'none'],
+		choices=['context', 'none'],
         help='the type of text that the model receives as additional context to inform generation')
-	parser.add_argument('--dataset', type=str, choices=['images','pew', 'statista', 'concadia', 'hci'], required = True,
+	parser.add_argument('--dataset', type=str, choices=['all', 'pew', 'statista', 'concadia', 'hci'], required = True,
         help='what should be randomized for a baseline condition')
 	parser.add_argument('--root_dir', type=str,
 		required=True, help='where the raw dataset is stored')
