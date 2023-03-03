@@ -32,7 +32,8 @@ def create_input_files(root_dir, json_path, image_folder, labels_per_image, cont
     dataset = "wikipedia"
 
     # Read JSON
-    with open(os.path.join(root_dir, json_path), 'r') as j:
+    # TODO: check image folder path
+    with open(os.path.join(root_dir, image_folder ,json_path), 'r') as j:
         data = json.load(j)
 
     if not os.path.exists(os.path.join(root_dir, output_folder)):

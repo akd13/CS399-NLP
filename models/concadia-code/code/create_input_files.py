@@ -12,12 +12,13 @@ if __name__ == '__main__':
 	parser.add_argument('context', type=str,
 		choices=['context', 'none'],
         help='the type of text that the model receives as additional context to inform generation')
-	parser.add_argument('--dataset', type=str, choices=['all', 'pew', 'statista', 'concadia', 'hci'], required = True,
+	parser.add_argument('--dataset', type=str, choices=['images', 'pew', 'statista', 'concadia', 'hci'],
+						required = True,
         help='what should be randomized for a baseline condition')
 	parser.add_argument('--root_dir', type=str, 
 		required=True, help='where the raw dataset is stored')
 	parser.add_argument('--image_subdir', type=str,
-		default="imgs",
+		default="images",
 		help='the name of the image subdir within `root_dir` that houses a decompressed version of `resized.zip`')
 	args = parser.parse_args()
 
@@ -38,11 +39,11 @@ if __name__ == '__main__':
 
 	create_input_files(root_dir=args.root_dir,
 		json_path=json_name+'.json',
-		image_folder=args.image_subdir,
+		image_folder=args.dataset,
     	labels_per_image=1,
 	    context=args.context,
 		# arxiv paper version:
     	# min_word_freq=1,
 		min_word_freq=1,
 		output_folder='parsed_data/' + args.context + args.dataset + '/',
-    	max_len=50)
+    	max_len=10000)
