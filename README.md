@@ -23,4 +23,5 @@ The datasets are collected from the following sources:
     1. Statista
     2. Pew
 ## Formatting the Data
-Coming soon
+1. `cd models/concadia-code/code`
+2 ` python3 create_input_files.py none --dataset images --root_dir ../../../datasets`
