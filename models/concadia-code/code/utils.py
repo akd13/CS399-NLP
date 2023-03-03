@@ -85,17 +85,11 @@ def create_input_files(root_dir, json_path, image_folder, labels_per_image, cont
     image_idx_list = list(range(0, len(data['images'])))
                           
     train_imgs = random.sample(image_idx_list, train_split) # Samples without replacement
-#    print('train imgs ', train_imgs)
 
     test_idx_list = list(set(image_idx_list) - set(train_imgs))
-#    print("Test idx list ", test_idx_list)
 
     test_imgs = random.sample(test_idx_list, test_split)
     val_imgs = list(set(test_idx_list) - set(test_imgs))
-
-    print('Train images[0] ', train_imgs[0])
-    print('Test imgs[0] ', test_imgs[0])
-    print('Val images[0] ', val_imgs[0])
 
     for idx in range(0, len(data['images'])):
         img = data['images'][idx]
@@ -104,17 +98,17 @@ def create_input_files(root_dir, json_path, image_folder, labels_per_image, cont
         # Update word frequency
         # Word frequency is updated according to all text input (label + potential context)
 
-        word_freq.update(img['context']['tokens'])
-        word_freq.update(img['caption']['tokens'])
+        if context != "none":
+            word_freq.update(img['context']['tokens'])
+            word_freq.update(img['caption']['tokens'])
 
-        if len(img['context']['tokens']) <= max_len:
-            labels.append(img['context']['tokens'])
-        if len(img['caption']['tokens']) <= max_len:
-            labels.append(img['caption']['tokens'])
+        word_freq.update(img['description']['tokens'])
+
+        if len(img['description']['tokens']) <= max_len:
+            labels.append(img['description']['tokens'])
 
         if context != "none":
-            contexts.append(img['caption']['raw'])
-            contexts.append(img['context']['raw'])
+            contexts.append(img['caption']['raw'] + img['context']['raw'])
 
         if len(labels) == 0:
             continue
@@ -122,7 +116,6 @@ def create_input_files(root_dir, json_path, image_folder, labels_per_image, cont
             continue
 
         path = os.path.join(root_dir, image_folder, img['filename'])
-        print('Path ', path)
 
         if idx in train_imgs:
             train_image_paths.append(path)
@@ -167,10 +160,6 @@ def create_input_files(root_dir, json_path, image_folder, labels_per_image, cont
     with open(os.path.join(root_dir, output_folder, 'WORDMAP_' + base_filename + '.json'), 'w') as j:
         json.dump(word_map, j)
 
-#    exit()
-# TODO: Create input files for all the datasets
-# Add in a train-test split
-
     # Sample labels for each image, save images to HDF5 file, and labels and their lengths to JSON files
     seed(123)
     for impaths, imlabs, imcontexts, split in [
@@ -194,8 +183,6 @@ def create_input_files(root_dir, json_path, image_folder, labels_per_image, cont
             contextlens = []
 
             for i, path in enumerate(tqdm(impaths)):
-                # print("path: ", path)
-
                 # Sample labels
                 if len(imlabs[i]) <= labels_per_image:
                     labels = imlabs[i] + [choice(imlabs[i])

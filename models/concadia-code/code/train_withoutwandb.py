@@ -115,16 +115,6 @@ def run_training():
                                             lr=encoder_lr) if fine_tune_encoder else None
 
     nlg_type = f'{args.image_encoder_type}-lstm'
-    wandb.init(project="concadia",
-               job_type='train',
-               dir=run_dir,
-               name=folder_name,
-               config={**specs_dict, 'run_dir': run_dir, 'nlg_type': nlg_type,
-                       'context_encoder_type': context_encoder_type},
-               group=f"label={args.label_cond}, context={'none' if args.blank_context else args.context_cond}, randomized={args.randomized}",
-               tags=[nlg_type, context_encoder_type])
-
-    # Move to GPU, if available
     decoder = decoder.to(device)
     encoder = encoder.to(device)
 
@@ -199,14 +189,10 @@ def run_training():
         write_csv(run_dir, args.label_cond, args.context_cond, args.randomized,
                   blank_img, args.blank_context, "val", epoch, val_metrics)
 
-        wandb.log(format_log_metrics(train_metrics, val_metrics,
-                  val_metrics_greedy_decoding, epoch))
 
     if start_epoch > best_epoch:
         print('Current resumed run does not have a new best checkpoint.')
     else:
-        wandb.run.summary['best_epoch'] = best_epoch
-        wandb.run.summary['best_val_cider'] = best_cider
         # Save best checkpoint
         save_checkpoint(checkpoint_dir, best_epoch, 0, best_encoder, best_decoder,
                         best_encoder_optimizer, best_decoder_optimizer, best_cider, checkpoint_type='best')
