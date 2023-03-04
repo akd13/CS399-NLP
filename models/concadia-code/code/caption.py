@@ -8,7 +8,7 @@ import matplotlib.cm as cm
 import skimage.transform
 import argparse
 import imageio
-from scipy.misc import imread, imresize
+from imageio import imread
 from PIL import Image
 from utils import *
 from nlgeval import NLGEval

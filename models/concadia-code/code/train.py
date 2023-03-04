@@ -6,6 +6,7 @@ from datetime import datetime
 import sys
 import json
 import csv
+import gc
 
 import torch.backends.cudnn as cudnn
 import torch.optim
@@ -60,7 +61,7 @@ cudnn.benchmark = True
 loss_function = nn.CrossEntropyLoss()
 
 # Training parameters
-batch_size = 32
+batch_size = 32 # NOTE: Used to be 32, reduced it because of torch CUDA memory error
 workers = 1  # for data-loading; right now, only 1 works with h5py
 encoder_lr = 1e-4  # learning rate for encoder if fine-tuning
 decoder_lr = 4e-4  # learning rate for decoder
@@ -100,6 +101,15 @@ def run_training():
     # keeps track of number of epochs since there's been an improvement in validation BLEU
     epochs_since_improvement = 0
 
+ #   if args.blank_context:
+  #      decoder = DecoderWithAttention(attention_dim=attention_dim,
+   #                                    embed_dim=emb_dim,
+    #                                   decoder_dim=decoder_dim,
+    #                                   vocab_size=len(word_map),
+    #                                   dropout=dropout,
+    #                                   encoder_dim=image_encoder_dims[args.image_encoder_type])
+
+   # else:
     decoder = DecoderWithContextRevised(attention_dim=attention_dim,
                                         embed_dim=emb_dim,
                                         decoder_dim=decoder_dim,
@@ -145,7 +155,6 @@ def run_training():
 
     # Epochs
     for epoch in range(start_epoch, args.epochs):
-
         # Decay learning rate if there is no improvement for 8 consecutive epochs, and terminate training after 20
         if epochs_since_improvement == 20:
             break
@@ -286,8 +295,9 @@ def train(train_loader, encoder, decoder, criterion, encoder_optimizer, decoder_
         # Forward prop.
         imgs = encoder(imgs)
         if args.context_cond == "none":
+            # NOTE: I changed this, before it didn't include the contexts, context_mask, et cetera.
             scores, labs_sorted, decode_lengths, alphas, sort_ind = decoder(
-                imgs, labs, lablens)
+                imgs, labs, lablens, encoded_articles=None, article_attention_mask=None, blank_context=args.blank_context)
         else:
             scores, labs_sorted, decode_lengths, alphas, sort_ind = decoder(
                 imgs, labs, lablens, contexts, context_mask, args.blank_context, blank_context_zeros)
@@ -313,7 +323,6 @@ def train(train_loader, encoder, decoder, criterion, encoder_optimizer, decoder_
         if encoder_optimizer is not None:
             encoder_optimizer.zero_grad()
         loss.backward()
-
         # Clip gradients
         if grad_clip is not None:
             clip_gradient(decoder_optimizer, grad_clip)
@@ -404,11 +413,11 @@ def validate(val_loader, encoder, decoder, criterion, epoch, context_tokenizer):
             alllabs = alllabs.to(device)
 
             # COMMENT OUT
-            if not args.context_cond == "none":
-                tokenized_contexts = context_tokenizer(
+          #  if not args.context_cond == "none":
+            tokenized_contexts = context_tokenizer(
                     contexts, return_tensors="pt", padding="max_length", truncation=True, max_length=max_context_len)
-                contexts = tokenized_contexts.input_ids.to(device)
-                context_mask = tokenized_contexts.attention_mask.to(device)
+            contexts = tokenized_contexts.input_ids.to(device)
+            context_mask = tokenized_contexts.attention_mask.to(device)
 
             # Forward prop.
             if encoder is not None:
@@ -530,8 +539,8 @@ def validate(val_loader, encoder, decoder, criterion, epoch, context_tokenizer):
                 'hypothesis_greedy': {'text': hyp_from_scratch}
             }
             for hypothesis_type in ['hypothesis', 'hypothesis_greedy']:
-                print("Ref ", ref)
-                print("Hypothesis ", datapoint[hypothesis_type]['text'])
+             #   print("Ref ", ref)
+             #   print("Hypothesis ", datapoint[hypothesis_type]['text'])
 
                 metrics = nlgeval.compute_metrics(
                     [[ref]], [datapoint[hypothesis_type]['text']])
@@ -570,7 +579,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Training configs.')
     parser.add_argument('label_cond', type=str, choices=['description', 'caption'],
                         help='Output type.')
-    parser.add_argument('context_cond', type=str, choices=['description', 'caption', 'context'],
+    parser.add_argument('context_cond', type=str, choices=['none', 'context'],
                         help='Context type (what to input aside from img).')
     parser.add_argument('randomized', type=str, choices=['pew', 'description', 'caption', 'context', 'none'],
                         help='Type of dataset we are training on.')
@@ -585,7 +594,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=35,
                         help='Number of epochs.')
     parser.add_argument('--data_dir', type=str,
-                        default='../../../datasets/all/parsed_data/',
+                        default='../../../datasets/parsed_data/',
                         help="Where data for model training and eval is stored")
     parser.add_argument('--output_dir', type=str,
                         default='.',
@@ -595,7 +604,7 @@ if __name__ == '__main__':
 
     # Data parameters
     data_folder = os.path.join(args.data_dir, args.context_cond +
-                                'all')  # folder with data files saved by create_input_files.py
+                                'images')  # folder with data files saved by create_input_files.py
     data_name = 'wikipedia_1_min_word_freq'  # base name shared by data files
 
     if args.debug:

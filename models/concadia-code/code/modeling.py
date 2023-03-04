@@ -523,9 +523,12 @@ class DecoderWithContextRevised(nn.Module):
         # Sort input data by decreasing lengths; why? apparent below
         caption_lengths, sort_ind = caption_lengths.squeeze(1).sort(dim=0, descending=True)
         encoder_out = encoder_out[sort_ind]
-        encoded_captions = encoded_captions[sort_ind]
-        encoded_articles = encoded_articles[sort_ind]
-        article_attention_mask = article_attention_mask[sort_ind] 
+
+        if not blank_context:
+            encoded_captions = encoded_captions[sort_ind]
+            encoded_articles = encoded_articles[sort_ind]
+            article_attention_mask = article_attention_mask[sort_ind] 
+
         if greedy_decode_from_scratch:
             # decode from scratch; do not restrict decode lengths
             caption_lengths = torch.zeros(caption_lengths.shape, dtype=caption_lengths.dtype) 
@@ -544,7 +547,6 @@ class DecoderWithContextRevised(nn.Module):
                 paragraph_emb = torch.ones(batch_size, 52, 768).to(device)
 
         paragraph_emb_flat = paragraph_emb.sum(axis=1) # [35, 768]
-
 
         # Initialize LSTM state
         h, c, decoder_input = self.init_hidden_state(encoder_out, paragraph_emb_flat)  # (batch_size, decoder_dim)

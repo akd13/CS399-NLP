@@ -46,4 +46,4 @@ if __name__ == '__main__':
     	# min_word_freq=1,
 		min_word_freq=1,
 		output_folder='parsed_data/' + args.context + args.dataset + '/',
-    	max_len=10000)
+    	max_len=50)
