@@ -45,7 +45,7 @@ def sample_output(run_id, data, checkpoint_path, label, context, nlg_type, conte
 
         # Generating model output
         try:
-            image_fn = os.path.join(args.data_dir, "wikicommons/resized", img_data['filename'])
+            image_fn = os.path.join(args.data_dir,  img_data['filename'])
             if context == "none": # should not be executed
                 seq, _ = caption.label_image_beam_search(encoder, decoder, image_fn, word_map, beam_size, gpu_id=args.gpu_id)
             else:
@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
     # Load data
     print("Loading data ...")
-    with open(os.path.join(args.data_dir,'wiki_split.json'), 'r') as json_file:
+    with open(os.path.join(args.data_dir,'images.json'), 'r') as json_file:
         data = json.load(json_file)
     datapoints = data['images']
     data = [dp for dp in datapoints if dp['split'] == 'test']
@@ -107,6 +107,9 @@ if __name__ == '__main__':
         if run.config['nlg_type'] not in {'resnet-lstm', 'densenet-lstm'}: continue
         run_id = run.name
         run_dir = os.path.join(args.runs_dir, 'runs', run_id)
+ # test only the ID that works
+        if (not os.path.exists(run_dir)):
+            continue
 
         with open(os.path.join(run_dir, 'specs.json'), 'r') as f:
             specs = json.load(f)
@@ -118,13 +121,15 @@ if __name__ == '__main__':
         # Load word map (word2ix)
         print("Loading word map")
 
-        # NOTE: What is the word map here??
         with open(os.path.join(data_location, "WORDMAP_wikipedia_1_min_word_freq.json"), 'r') as j:
             word_map = json.load(j)
         rev_word_map = {v: k for k, v in word_map.items()}  # ix2word
 
         for run_id, nlg_type, context_encoder_type in curr_runs:
             run_dir = os.path.join(args.runs_dir, 'runs', run_id)
+
+            if (not os.path.exists(run_dir)):
+                continue
 
             with open(os.path.join(run_dir, 'specs.json'), 'r') as f:
                 specs = json.load(f)
@@ -138,6 +143,6 @@ if __name__ == '__main__':
                     checkpoint_path = os.path.join(checkpoint_dir, fp)
 
             # Sample output
-            print(f"Sampling output for checkpoint {checkpoint_path} ...")
+                    print(f"Sampling output for checkpoint {checkpoint_path} ...")
 
-            sample_output(run_id, data, checkpoint_path, specs['label_cond'], specs['context_cond'], nlg_type, context_encoder_type, blank_context, specs['randomized'], beam_size=args.beam_size)
+                    sample_output(run_id, data, checkpoint_path, specs['label_cond'], specs['context_cond'], nlg_type, context_encoder_type, blank_context, specs['randomized'], beam_size=args.beam_size)

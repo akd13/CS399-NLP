@@ -8,7 +8,7 @@ import matplotlib.cm as cm
 import skimage.transform
 import argparse
 import imageio
-from scipy.misc import imread, imresize
+from imageio import imread
 from PIL import Image
 from utils import *
 from nlgeval import NLGEval
@@ -98,7 +98,7 @@ def labelwcontext_image_beam_search(encoder, decoder, tokenizer, image_path, con
     vocab_size = len(word_map)
 
     # Read image and process
-    img = imageio.imread(image_path)
+    img = imageio.imread(image_path, pilmode='RGB')
     if len(img.shape) == 2:
         img = img[:, :, np.newaxis]
         img = np.concatenate([img, img, img], axis=2)
@@ -118,7 +118,6 @@ def labelwcontext_image_beam_search(encoder, decoder, tokenizer, image_path, con
     # Flatten encoding
     encoder_out = encoder_out.view(1, -1, encoder_dim)  # (1, num_pixels, encoder_dim)
     num_pixels = encoder_out.size(1)
-
     # We'll treat the problem as having a batch size of k
     encoder_out = encoder_out.expand(k, num_pixels, encoder_dim)  # (k, num_pixels, encoder_dim)
 
@@ -263,6 +262,7 @@ def label_image_beam_search(encoder, decoder, image_path, word_map, beam_size=3,
     image = transform(img).to(device)  # (3, 256, 256)
     # Encode
     image = image.unsqueeze(0)  # (1, 3, 256, 256)
+    print(image.size())
     encoder_out = encoder(image)  # (1, enc_image_size, enc_image_size, encoder_dim)
     enc_image_size = encoder_out.size(1)
     encoder_dim = encoder_out.size(3)
@@ -382,7 +382,7 @@ def visualize_att(image_path, seq, alphas, rev_word_map, smooth=True):
     :param rev_word_map: reverse word mapping, i.e. ix2word
     :param smooth: smooth weights?
     """
-    image = Image.open(image_path)
+    image = Image.open(image_path).convert('RGB')
     image = image.resize([14 * 24, 14 * 24], Image.LANCZOS)
 
     words = [rev_word_map[ind] for ind in seq]
