@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
     # Load data
     print("Loading data ...")
-    with open(os.path.join(args.data_dir,'wiki_split.json'), 'r') as json_file:
+    with open(os.path.join(args.data_dir,'images.json'), 'r') as json_file:
         data = json.load(json_file)
     datapoints = data['images']
     data = [dp for dp in datapoints if dp['split'] == 'test']
