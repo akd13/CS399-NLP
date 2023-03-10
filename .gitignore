@@ -9,5 +9,5 @@ venv/
 pew-images
 statista-images
 model
-/datasets/fix_datasets.ipynb
+/datasets/scripts/fix_datasets.ipynb
 DenseNet
