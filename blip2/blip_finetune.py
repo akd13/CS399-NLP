@@ -27,8 +27,6 @@ train_folder_path = "concadia/imgs"
 valid_folder_path = "concadia/imgs"
 
 dataset = load_dataset("imagefolder", data_dir=train_folder_path, split="train")
-# v_dataset = load_dataset("imagefolder", data_dir=valid_folder_path, split = "train") # PROBLEM: Why can't we use the 'val' split?
-# TODO: Make sure these are different samples of the dataset!!
 
 train_dataset = dataset.filter(lambda example: example["split"] == "train")
 v_dataset = dataset.filter(lambda example: example["split"] == "val")
@@ -64,7 +62,7 @@ model.to(device)
 
 model.train()
 
-for epoch in range(1):
+for epoch in range(10):
   print("Epoch:", epoch)
   for idx, batch in enumerate(train_dataloader):
     input_ids = batch.pop("input_ids").to(device)
@@ -118,25 +116,12 @@ json_object = json.dumps(generation_blip_finetuned)
 with open("generation_blip_finetuned.json", "w") as outfile:
     outfile.write(json_object)
 
-# Create metadata file for the load_dataset function
-metadata = pd.DataFrame({'file_name':['']*50, 'text': ['']*50})
-for index, row in metadata.iterrows():
-  row['file_name'] = 'Copy of {0}.png'.format(index + 50)
-  row['text'] = open("/content/drive/MyDrive/Graph Descriptions/Caption Benchmark/data/statista/captions/{0}.txt".format(index + 50), "r").read()
-
-metadata.to_csv("metadata.csv")
-
-# Get the data and make it into a dataset object
-train_folder_path = "/content/drive/MyDrive/Graph Descriptions/Caption Benchmark/data/statista/train_images"
-valid_folder_path = "/content/drive/MyDrive/Graph Descriptions/Caption Benchmark/data/statista/valid_images"
-train_dataset = load_dataset("imagefolder", data_dir=train_folder_path)
-valid_dataset = load_dataset("imagefolder", data_dir=valid_folder_path)
-
 def tokenize_function(examples):
   return feature_extractor(images= examples["image"], return_tensors= "pt")
 
-tokenized_train_datasets = train_dataset.map(tokenize_function, batched=True) # batched=True
-tokenized_valid_datasets = valid_dataset.map(tokenize_function, batched=True) # batched=True
+# Question: Why tokenize?
+#tokenized_train_datasets = train_dataset.map(tokenize_function, batched=True) # batched=True
+#tokenized_valid_datasets = valid_dataset.map(tokenize_function, batched=True) # batched=True
 
 # Change this to BLEU-1 Score
 def compute_metrics(eval_pred):
@@ -147,32 +132,10 @@ training_args = TrainingArguments(output_dir="test_trainer")
 trainer = Trainer(
     model=model,
     args=training_args,
-    train_dataset=tokenized_train_datasets['train'],
-    eval_dataset=tokenized_valid_datasets['train'], # add to the same dataset and do "valid"
+    train_dataset=train_dataset,
+    eval_dataset=valid_dataset,
     compute_metrics=compute_metrics,
 )
 
 trainer.train()
-
-train_dataset = load_dataset("imagefolder", data_dir=train_folder_path)
-valid_dataset = load_dataset("imagefolder", data_dir=valid_folder_path)
-
-def tokenize_function(examples):
-  return feature_extractor(images= examples["image"], return_tensors= "pt")
-
-tokenized_train_datasets = train_dataset.map(tokenize_function, batched=True)
-tokenized_valid_datasets = valid_dataset.map(tokenize_function, batched=True)
-
-def compute_metrics(eval_pred):
-  candidate, reference = eval_pred
-  return sentence_bleu(reference, candidate)
-
-training_args = TrainingArguments(output_dir="test_trainer")
-trainer = Trainer(
-    model=model,
-    args=training_args,
-    train_dataset=tokenized_train_datasets['train'],
-    eval_dataset=tokenized_valid_datasets['train'], # add to the same dataset and do "valid"
-    compute_metrics=compute_metrics,
-)
-trainer.train()
+trainer.evaluate(test_dataset)
