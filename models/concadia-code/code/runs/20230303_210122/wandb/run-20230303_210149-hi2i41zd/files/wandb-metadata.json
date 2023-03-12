@@ -1,0 +1,95 @@
+{
+    "os": "Linux-5.15.0-1030-aws-x86_64-with-glibc2.29",
+    "python": "3.8.10",
+    "heartbeatAt": "2023-03-03T21:01:49.850887",
+    "startedAt": "2023-03-03T21:01:49.477473",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--image_encoder_type",
+        "resnet",
+        "--context_encoder_type",
+        "roberta",
+        "description",
+        "context",
+        "none",
+        "--epochs",
+        "10"
+    ],
+    "state": "running",
+    "program": "train.py",
+    "codePath": "models/concadia-code/code/train.py",
+    "git": {
+        "remote": "https://github.com/akd13/CS399-NLP.git",
+        "commit": "fca4669c8f932e6442b9434777a0756372f66e6a"
+    },
+    "email": null,
+    "root": "/home/ubuntu/CS399-NLP",
+    "host": "ip-172-31-0-56",
+    "username": "ubuntu",
+    "executable": "/home/ubuntu/CS399-NLP/venv/bin/python3",
+    "cpu_count": 4,
+    "cpu_count_logical": 8,
+    "cpu_freq": {
+        "current": 2862.3668750000006,
+        "min": 0.0,
+        "max": 0.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2799.54,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2799.54,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 3302.155,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2799.54,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2799.54,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2799.54,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2799.54,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2799.54,
+            "min": 0.0,
+            "max": 0.0
+        }
+    ],
+    "disk": {
+        "total": 969.3392639160156,
+        "used": 48.99299621582031
+    },
+    "gpu": "NVIDIA A10G",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA A10G",
+            "memory_total": 24146608128
+        }
+    ],
+    "memory": {
+        "total": 31.00641632080078
+    }
+}

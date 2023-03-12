@@ -15,7 +15,7 @@ for subdir in os.listdir('.'):
     if not os.path.isdir(subdir):
         continue
     print(subdir)
-    if subdir!='description_context_none_densenet-lstm_roberta':
+    if subdir!='description_none_none_densenet-lstm_none':
         continue
     label_cond, context_cond, randomized, nlg_type, context_encoder_type = subdir.split('_')
     for fp in os.listdir(subdir):

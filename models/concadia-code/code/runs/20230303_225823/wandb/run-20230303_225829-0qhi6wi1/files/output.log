@@ -1,0 +1,15 @@
+
+Epoch: [0][0/1117]	Batch Time 10.022 (10.022)	Loss 12.2181 (12.2181)	Perplex 202410.8398 (202410.8398)	NEW Perplex 100655.5654 (100655.5654)	Top-5 Acc 0.039 (0.039)
+Epoch: [0][100/1117]	Batch Time 7.786 (6.672)	Loss 7.1815 (7.6643)	Perplex 1314.9041 (6330.3034)	NEW Perplex 655.4356 (1206.9548)	Top-5 Acc 26.908 (23.884)
+Traceback (most recent call last):
+  File "train.py", line 647, in <module>
+    run_training()
+  File "train.py", line 158, in run_training
+    train_metrics = train(train_loader=train_loader,
+  File "train.py", line 315, in train
+    loss.backward()
+  File "/home/ubuntu/CS399-NLP/venv/lib/python3.8/site-packages/torch/_tensor.py", line 488, in backward
+    torch.autograd.backward(
+  File "/home/ubuntu/CS399-NLP/venv/lib/python3.8/site-packages/torch/autograd/__init__.py", line 197, in backward
+    Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 5.63 GiB (GPU 0; 22.06 GiB total capacity; 13.03 GiB already allocated; 1.38 GiB free; 19.27 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF

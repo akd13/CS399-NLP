@@ -1,0 +1,26 @@
+2023-03-03 21:01:49,478 INFO    MainThread:32505 [wandb_setup.py:_flush():68] Configure stats pid to 32505
+2023-03-03 21:01:49,478 INFO    MainThread:32505 [wandb_setup.py:_flush():68] Loading settings from /home/ubuntu/.config/wandb/settings
+2023-03-03 21:01:49,478 INFO    MainThread:32505 [wandb_setup.py:_flush():68] Loading settings from /home/ubuntu/CS399-NLP/models/concadia-code/code/wandb/settings
+2023-03-03 21:01:49,478 INFO    MainThread:32505 [wandb_setup.py:_flush():68] Loading settings from environment variables: {'_require_service': 'True'}
+2023-03-03 21:01:49,478 INFO    MainThread:32505 [wandb_setup.py:_flush():68] Inferring run settings from compute environment: {'program_relpath': 'models/concadia-code/code/train.py', 'program': 'train.py'}
+2023-03-03 21:01:49,478 INFO    MainThread:32505 [wandb_setup.py:_flush():68] Applying login settings: {'api_key': '***REDACTED***'}
+2023-03-03 21:01:49,478 INFO    MainThread:32505 [wandb_init.py:_log_setup():492] Logging user logs to ./runs/20230303_210122/wandb/run-20230303_210149-hi2i41zd/logs/debug.log
+2023-03-03 21:01:49,478 INFO    MainThread:32505 [wandb_init.py:_log_setup():493] Logging internal logs to ./runs/20230303_210122/wandb/run-20230303_210149-hi2i41zd/logs/debug-internal.log
+2023-03-03 21:01:49,479 INFO    MainThread:32505 [wandb_init.py:init():532] calling init triggers
+2023-03-03 21:01:49,479 INFO    MainThread:32505 [wandb_init.py:init():538] wandb.init called with sweep_config: {}
+config: {'data_name': 'wikipedia_1_min_word_freq', 'data_folder': '../../../datasets/parsed_data/contextimages', 'label_cond': 'description', 'context_cond': 'context', 'randomized': 'none', 'blank_img': False, 'blank_context': False, 'blank_context_zeros': False, 'context_model': 'revised', 'emb_dim': '512', 'attention_dim': '512', 'decoder_dim': '512', 'dropout': '0.5', 'device': 'cuda:0', 'cudnn.benchmark': 'True', 'loss_function': 'CrossEntropyLoss()', 'batch_size': '32', 'workers': '1', 'encoder_lr': '0.0001', 'decoder_lr': '0.0004', 'grad_clip': '5.0', 'alpha_c': '1.0', 'fine_tune_encoder': 'False', 'run_dir': './runs/20230303_210122', 'nlg_type': 'resnet-lstm', 'context_encoder_type': 'roberta'}
+2023-03-03 21:01:49,479 INFO    MainThread:32505 [wandb_init.py:init():588] starting backend
+2023-03-03 21:01:49,479 INFO    MainThread:32505 [wandb_init.py:init():592] setting up manager
+2023-03-03 21:01:49,480 INFO    MainThread:32505 [backend.py:_multiprocessing_setup():106] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2023-03-03 21:01:49,481 INFO    MainThread:32505 [wandb_init.py:init():599] backend started and connected
+2023-03-03 21:01:49,485 INFO    MainThread:32505 [wandb_init.py:init():687] updated telemetry
+2023-03-03 21:01:49,519 INFO    MainThread:32505 [wandb_init.py:init():727] communicating run to backend with 60.0 second timeout
+2023-03-03 21:01:49,766 INFO    MainThread:32505 [wandb_run.py:_on_init():2134] communicating current version
+2023-03-03 21:01:49,815 INFO    MainThread:32505 [wandb_run.py:_on_init():2143] got version response 
+2023-03-03 21:01:49,815 INFO    MainThread:32505 [wandb_init.py:init():775] starting run threads in backend
+2023-03-03 21:01:49,867 INFO    MainThread:32505 [wandb_run.py:_console_start():2114] atexit reg
+2023-03-03 21:01:49,868 INFO    MainThread:32505 [wandb_run.py:_redirect():1969] redirect: SettingsConsole.WRAP_RAW
+2023-03-03 21:01:49,868 INFO    MainThread:32505 [wandb_run.py:_redirect():2034] Wrapping output streams.
+2023-03-03 21:01:49,868 INFO    MainThread:32505 [wandb_run.py:_redirect():2059] Redirects installed.
+2023-03-03 21:01:49,869 INFO    MainThread:32505 [wandb_init.py:init():817] run started, returning control to user process
+2023-03-03 21:08:41,023 WARNING MsgRouterThr:32505 [router.py:message_loop():77] message_loop has been closed

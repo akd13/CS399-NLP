@@ -111,6 +111,9 @@ if __name__ == '__main__':
         if (not os.path.exists(run_dir)):
             continue
 
+        # Take this out after running everything else
+        if (run_id != '20230305_012444'):
+            continue
         with open(os.path.join(run_dir, 'specs.json'), 'r') as f:
             specs = json.load(f)
         data_location = specs['data_folder'].replace("../../../../../..","")
@@ -126,6 +129,10 @@ if __name__ == '__main__':
         rev_word_map = {v: k for k, v in word_map.items()}  # ix2word
 
         for run_id, nlg_type, context_encoder_type in curr_runs:
+            # NOTE: Take this out after running the one run
+            if (run_id != '20230305_012444'):
+                continue
+
             run_dir = os.path.join(args.runs_dir, 'runs', run_id)
 
             if (not os.path.exists(run_dir)):
