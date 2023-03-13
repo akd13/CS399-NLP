@@ -23,10 +23,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 
 # Get the data and make it into a dataset object
-train_folder_path = "concadia/imgs"
-valid_folder_path = "concadia/imgs"
+images_path = '../datasets/downsampled_images'
 
-dataset = load_dataset("imagefolder", data_dir=train_folder_path, split="train")
+dataset = load_dataset("imagefolder", data_dir=images_path, split="train")
 
 train_dataset = dataset.filter(lambda example: example["split"] == "train")
 v_dataset = dataset.filter(lambda example: example["split"] == "val")
@@ -96,9 +95,8 @@ print("Generated caption ", generated_caption)
 
 fig = plt.figure(figsize=(18, 14))
 generation_blip_finetuned = {}
-# prepare image for the model
 
-for i, example in enumerate(v_dataset):
+for i, example in enumerate(test_dataset):
   image = example["image"]
   reference = example["text"] # NOTE: This is the example of generated caption!
   inputs = feature_extractor(images=image, return_tensors="pt").to(device)
@@ -107,35 +105,13 @@ for i, example in enumerate(v_dataset):
   generated_ids = model.generate(pixel_values=pixel_values, max_length=200)
   generated_caption = feature_extractor.batch_decode(generated_ids, skip_special_tokens=True)[0]
   generation_blip_finetuned[reference] = generated_caption
-  #fig.add_subplot(1, 1, i+1)
-  #plt.imshow(image)
-  #plt.axis("off")
-  #plt.title(f"Generated caption: {generated_caption}")
+
+  fig.add_subplot(1, 1, i+1)
+  plt.imshow(image)
+  plt.axis("off")
+  plt.title(f"Generated caption: {generated_caption}")
 
 json_object = json.dumps(generation_blip_finetuned)
-with open("generation_blip_finetuned.json", "w") as outfile:
+
+with open("blip_finetune_captions_test.json", "w") as outfile:
     outfile.write(json_object)
-
-def tokenize_function(examples):
-  return feature_extractor(images= examples["image"], return_tensors= "pt")
-
-# Question: Why tokenize?
-#tokenized_train_datasets = train_dataset.map(tokenize_function, batched=True) # batched=True
-#tokenized_valid_datasets = valid_dataset.map(tokenize_function, batched=True) # batched=True
-
-# Change this to BLEU-1 Score
-def compute_metrics(eval_pred):
-  candidate, reference = eval_pred
-  return sentence_bleu(reference, candidate)
-
-training_args = TrainingArguments(output_dir="test_trainer")
-trainer = Trainer(
-    model=model,
-    args=training_args,
-    train_dataset=train_dataset,
-    eval_dataset=valid_dataset,
-    compute_metrics=compute_metrics,
-)
-
-trainer.train()
-trainer.evaluate(test_dataset)
