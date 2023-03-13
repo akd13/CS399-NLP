@@ -31,8 +31,9 @@ train_dataset = dataset.filter(lambda example: example["split"] == "train")
 v_dataset = dataset.filter(lambda example: example["split"] == "val")
 test_dataset = dataset.filter(lambda example: example["split"] == "test")
 
-print("Dataset ", train_dataset[0])
-print("Val dataset ", v_dataset[0])
+print("Length of train dataset ", len(train_dataset))
+print("Length of val dataset ", len(v_dataset))
+print("Length of test dataset ", len(test_dataset))
 
 class ImageCaptioningDataset(Dataset):
     def __init__(self, dataset, processor):
@@ -83,7 +84,7 @@ for epoch in range(10):
 
 # prepare image for the model
 # load image
-example = v_dataset[10]
+''' example = v_dataset[10]
 image = example["image"]
 
 inputs = feature_extractor(images=image, return_tensors="pt").to(device)
@@ -93,7 +94,7 @@ generated_ids = model.generate(pixel_values=pixel_values, max_length=50)
 generated_caption = feature_extractor.batch_decode(generated_ids, skip_special_tokens=True)[0]
 print("Generated caption ", generated_caption)
 
-fig = plt.figure(figsize=(18, 14))
+fig = plt.figure(figsize=(18, 14)) '''
 generation_blip_finetuned = {}
 
 for i, example in enumerate(test_dataset):
