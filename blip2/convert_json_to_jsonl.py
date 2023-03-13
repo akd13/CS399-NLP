@@ -12,11 +12,10 @@ with open(images_path + 'metadata.jsonl', 'w') as outfile:
         entry['file_name'] = entry['filename']
         del entry['filename']
 
-        entry['text'] = entry['context']['raw'] + entry['caption']['raw']
+        entry['context'] = entry['context']['raw'] + entry['caption']['raw']
         entry['label'] = entry['description']['raw']
 
         del entry['description']
-        del entry['context']
         del entry['caption']
 
         json.dump(entry, outfile)

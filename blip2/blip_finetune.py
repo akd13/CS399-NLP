@@ -15,6 +15,7 @@ import itertools
 from torch.utils.data import Dataset, DataLoader
 from matplotlib import pyplot as plt
 import json
+from transformers import BertTokenizer, BertModel
 
 feature_extractor = AutoProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
 model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
@@ -22,10 +23,10 @@ model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-capt
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 
-# Get the data and make it into a dataset object
 images_path = '../datasets/downsampled_images'
 
 dataset = load_dataset("imagefolder", data_dir=images_path, split="train")
+tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
 train_dataset = dataset.filter(lambda example: example["split"] == "train")
 v_dataset = dataset.filter(lambda example: example["split"] == "val")
@@ -35,23 +36,60 @@ print("Length of train dataset ", len(train_dataset))
 print("Length of val dataset ", len(v_dataset))
 print("Length of test dataset ", len(test_dataset))
 
-class ImageCaptioningDataset(Dataset):
+class NoContextDataset(Dataset):
     def __init__(self, dataset, processor):
         self.dataset = dataset
         self.processor = processor
+        self.hasContext = False
 
     def __len__(self):
         return len(self.dataset)
 
     def __getitem__(self, idx):
         item = self.dataset[idx]
-        encoding = self.processor(images=item["image"], text=item["text"], padding="max_length", return_tensors="pt")
+        encoding = self.processor(images=item["image"], text=item["label"], padding="max_length", return_tensors="pt")
         # remove batch dimension
         encoding = {k:v.squeeze() for k,v in encoding.items()}
         return encoding
     
-train_dataset = ImageCaptioningDataset(train_dataset, feature_extractor)
-valid_dataset = ImageCaptioningDataset(train_dataset, feature_extractor)
+class ContextDataset(Dataset):
+    def __init__(self, dataset, processor):
+        self.dataset = dataset
+        self.processor = processor
+        self.hasContext = True
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, idx):
+        item = self.dataset[idx]
+        tokenized_context = item["context"]
+        encoding = self.processor(images=item["image"], text=item["label"], padding="max_length", return_tensors="pt")
+        # remove batch dimension
+
+
+        encoding = {k:v.squeeze() for k,v in encoding.items()}
+
+        encoded_context = tokenizer.encode_plus(
+                text=item["context"],  # the sentence to be encoded
+                add_special_tokens=True,  # Add [CLS] and [SEP]
+                max_length = 512,  # maximum length of a sentence
+                pad_to_max_length=True,  # Add [PAD]s
+                truncation=True,
+                return_attention_mask = True,  # Generate the attention mask
+                return_tensors = 'pt',  # ask the function to return PyTorch tensors
+        )
+        #print("Shape of encoded context ", encoded_context['input_ids'].size())
+        #print("Shape of encoding input IDS ", encoding['input_ids'].size())
+
+        encoded_context['input_ids'] = torch.squeeze(encoded_context['input_ids'])
+        encoding['input_ids'] = torch.cat((encoding['input_ids'], encoded_context['input_ids']))
+        attn_mask = encoded_context['attention_mask']
+        return encoding
+
+train_dataset = ContextDataset(train_dataset, feature_extractor)
+valid_dataset = ContextDataset(train_dataset, feature_extractor)
+
 train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=1)
 valid_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=1)
 
@@ -62,25 +100,33 @@ model.to(device)
 
 model.train()
 
-for epoch in range(10):
-  print("Epoch:", epoch)
-  for idx, batch in enumerate(train_dataloader):
-    input_ids = batch.pop("input_ids").to(device)
-    pixel_values = batch.pop("pixel_values").to(device)
+for epoch in range(1):
+    print("Epoch:", epoch)
+    for idx, batch in enumerate(train_dataloader):
+        #print("Idx ", idx)
+       # print("Batch ", batch)
+        input_ids = batch.pop("input_ids").to(device)
+        pixel_values = batch.pop("pixel_values").to(device)
 
-    outputs = model(
+        print("input ids shape ", input_ids.shape)
+        print("pixel values ", pixel_values.shape)
+
+        if (input_ids.shape[1] > 1024): # 512 if no context dataset
+            continue
+
+        outputs = model(
                     input_ids=input_ids,
                     pixel_values=pixel_values,
                     labels=input_ids)
     
-    loss = outputs.loss
+        loss = outputs.loss
 
-    print("Loss:", loss.item())
+        print("Loss:", loss.item())
 
-    loss.backward()
+        loss.backward()
 
-    optimizer.step()
-    optimizer.zero_grad()
+        optimizer.step()
+        optimizer.zero_grad()
 
 # prepare image for the model
 # load image
@@ -99,7 +145,7 @@ generation_blip_finetuned = {}
 
 for i, example in enumerate(test_dataset):
   image = example["image"]
-  reference = example["text"] # NOTE: This is the example of generated caption!
+  reference = example["context"]
   inputs = feature_extractor(images=image, return_tensors="pt").to(device)
   pixel_values = inputs.pixel_values
 
