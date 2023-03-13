@@ -1,6 +1,8 @@
 import json
 import random
+
 split_files = ['../downsampled_images/images.json', '../images/images.json']
+
 for file in split_files:
     with open(file, 'r') as f:
         data = json.load(f)
