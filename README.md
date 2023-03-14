@@ -1,11 +1,18 @@
+# Set up env
+1. Navigate to the root directory of the project - `cd CS399-NLP/`
+1. Create a virtual environment
+    2. `pip install virtualenv`
+    2. `virtualenv venv` 
+2. Activate the virtual environment - `source venv/bin/activate`
+3. Install the requirements - `pip install -r requirements.txt`
+
 # Data Collection
 This project is to collect datasets for the task of generating descriptions for charts and graphs. 
 The datasets are collected from the following sources:
-1. Wikipedia
+1. Wikipedia (Concadia)
 2. Statista
 3. Pew
-4. Accessbility Journals
-5. 
+4. Accessbility Journals (HCI)
 ## Collecting the data
 1. Concadia
     1. Download `wiki_split.json` and `resized.zip`. 
