@@ -14,7 +14,7 @@ import torchvision.transforms as transforms
 from torch import nn
 from torch.nn.utils.rnn import pack_padded_sequence
 
-from modeling import Encoder, DecoderWithAttention, DecoderWithContext, DecoderWithContextRevised
+from modeling import Encoder, DecoderWithContextRevised
 from datasets import *
 from utils import *
 from nltk.translate.bleu_score import corpus_bleu
@@ -53,9 +53,10 @@ decoder_dim = 512  # dimension of decoder RNN
 dropout = 0.5
 # sets device for model and PyTorch tensors
 device = None
-if torch.backends.mps.is_available():
-    device = 'mps'
-elif torch.cuda.is_available():
+#TODO: M1 training
+# if torch.backends.mps.is_available():
+#     device = 'mps'
+if torch.cuda.is_available():
     device = torch.cuda.current_device()
 else:
     device = 'cpu'
