@@ -3,8 +3,8 @@ import numpy as np
 import h5py
 import json
 import torch
-# from scipy.misc import imread, imresize
-from imageio import imread
+# from scipy.ndimage import imread, imresize
+from imageio.v2 import imread
 import random 
 from tqdm import tqdm
 from collections import Counter
@@ -17,7 +17,7 @@ import sys
 # from os import path
 
 
-def create_input_files(root_dir, json_path, image_folder, labels_per_image, context, min_word_freq, output_folder, max_len=500):
+def create_input_files(root_dir, json_path, image_folder, labels_per_image, context, min_word_freq, output_folder, max_len=512):
     """
     Creates input files for training, validation, and test data.
 

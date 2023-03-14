@@ -1,3 +1,5 @@
+import os
+
 from utils import create_input_files
 import argparse
 import sys
@@ -12,7 +14,7 @@ if __name__ == '__main__':
 	parser.add_argument('context', type=str,
 		choices=['context', 'none'],
         help='the type of text that the model receives as additional context to inform generation')
-	parser.add_argument('--dataset', type=str, choices=['images', 'pew', 'statista', 'concadia', 'hci'],
+	parser.add_argument('--dataset', type=str, choices=['downsampled_images','images', 'pew', 'statista', 'concadia', 'hci'],
 						required = True,
         help='what should be randomized for a baseline condition')
 	parser.add_argument('--root_dir', type=str, 
@@ -36,7 +38,7 @@ if __name__ == '__main__':
 	# Create input files (along with word map)
 
 	print("Context ", args.context)
-
+	print("directory:",os.getcwd())
 	create_input_files(root_dir=args.root_dir,
 		json_path=json_name+'.json',
 		image_folder=args.dataset,
@@ -46,4 +48,4 @@ if __name__ == '__main__':
     	# min_word_freq=1,
 		min_word_freq=1,
 		output_folder='parsed_data/' + args.context + args.dataset + '/',
-    	max_len=50)
+    	max_len=300)

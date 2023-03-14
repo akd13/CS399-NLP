@@ -30,5 +30,8 @@ The datasets are collected from the following sources:
     1. Statista
     2. Pew
 ## Formatting the Data
-1. `cd models/concadia-code/code`
-2 ` python3 create_input_files.py none --dataset images --root_dir ../../../datasets`
+1. Navigate to inside the project, and `cd models/concadia-code/code`
+2. To create embeddings, ensure that your dataset has all images inside directory `images` and has the metadata in 
+`images.json`, then do the following - 
+    3. ` python3 create_input_files.py none --dataset <dataset> --root_dir ../../../datasets`
+2.  4.  `python3 create_input_files.py context --dataset <dataset> --root_dir ../../../datasets` 

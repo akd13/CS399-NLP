@@ -33,7 +33,7 @@ nlgeval = NLGEval(metrics_to_omit=['SkipThoughtCS', 'EmbeddingAverageCosineSimil
 blank_img = False
 blank_context_zeros = False
 context_model = "revised"  # original, revised
-max_context_len = 52  # maxlen in dataset
+max_context_len = 300  # maxlen in dataset
 
 context_encoders = {
     'none': 'bert-base-uncased',
@@ -52,16 +52,21 @@ attention_dim = 512  # dimension of attention linear layers
 decoder_dim = 512  # dimension of decoder RNN
 dropout = 0.5
 # sets device for model and PyTorch tensors
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-print('torch.cuda.is_available(): ', torch.cuda.is_available())
-print('device: ', device)
+device = None
+if torch.backends.mps.is_available():
+    device = 'mps'
+elif torch.cuda.is_available():
+    device = torch.cuda.current_device()
+else:
+    device = 'cpu'
+print('Using device:', device)
 # set to true only if inputs to model are fixed size; otherwise lot of computational overhead
 cudnn.benchmark = True
 loss_function = nn.CrossEntropyLoss()
 
 # Training parameters
 batch_size = 32
-workers = 1  # for data-loading; right now, only 1 works with h5py
+workers = 0  # for data-loading; right now, only 1 works with h5py
 encoder_lr = 1e-4  # learning rate for encoder if fine-tuning
 decoder_lr = 4e-4  # learning rate for decoder
 grad_clip = 5.  # clip gradients at an absolute value of
@@ -594,8 +599,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Data parameters
+    #TODO change directory path
     data_folder = os.path.join(args.data_dir, args.context_cond +
-                                'images')  # folder with data files saved by create_input_files.py
+                                'downsampled_images')  # folder with data files saved by create_input_files.py
     data_name = 'wikipedia_1_min_word_freq'  # base name shared by data files
 
     if args.debug:
