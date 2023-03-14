@@ -63,17 +63,29 @@ class Attention(nn.Module):
     Attention Network.
     """
 
-    def __init__(self, encoder_dim, decoder_dim, attention_dim, article_dim=None):
+    def __init__(self, encoder_dim, decoder_dim, attention_dim, attention_type='additive'):
         """
+        :param attention_type:
         :param encoder_dim: feature size of encoded images
         :param decoder_dim: size of decoder's RNN
         :param attention_dim: size of the attention network
         """
         super(Attention, self).__init__()
+        self.attention_type = attention_type
         self.encoder_att = nn.Linear(encoder_dim, attention_dim)  # linear layer to transform encoded image
         self.decoder_att = nn.Linear(decoder_dim + 768, attention_dim)  # linear layer to transform decoder's output
         self.full_att = nn.Linear(attention_dim, 1)  # linear layer to calculate values to be softmax-ed
-        self.relu = nn.ReLU()
+        if attention_type == 'additive':
+            self.relu = nn.ReLU()
+        elif attention_type == 'multiplicative':
+            self.tanh = nn.Tanh()
+        elif attention_type == 'dot':
+            self.dot = nn.Linear(decoder_dim, 1)
+        elif attention_type == 'bahdanau':
+            self.W = nn.Linear(attention_dim, attention_dim)
+            self.tanh = nn.Tanh()
+        else:
+            raise ValueError("`attention_type` must be either 'additive', 'multiplicative' or 'dot'")
         self.softmax = nn.Softmax(dim=1)  # softmax layer to calculate weights
 
     def forward(self, encoder_out, decoder_hidden):
@@ -86,7 +98,14 @@ class Attention(nn.Module):
         """
         att1 = self.encoder_att(encoder_out)  # (batch_size, num_pixels, attention_dim)
         att2 = self.decoder_att(decoder_hidden)  # (batch_size, attention_dim)
-        att = self.full_att(self.relu(att1 + att2.unsqueeze(1))).squeeze(2)  # (batch_size, num_pixels)
+        if self.attention_type == 'additive':
+            att = self.full_att(self.relu(att1 + att2.unsqueeze(1))).squeeze(2)  # (batch_size, num_pixels)
+        elif self.attention_type == 'multiplicative':
+            att = self.full_att(self.tanh(att1 * att2.unsqueeze(1))).squeeze(2)  # (batch_size, num_pixels)
+        elif self.attention_type == 'dot':
+            att = self.full_att(self.dot(att1 * att2.unsqueeze(1))).squeeze(2)
+        else:
+            att = self.full_att(self.relu(att1 + att2.unsqueeze(1))).squeeze(2)  # (batch_size, num_pixels)
         alpha = self.softmax(att)  # (batch_size, num_pixels)
         attention_weighted_encoding = (encoder_out * alpha.unsqueeze(2)).sum(dim=1)  # (batch_size, encoder_dim)
 
@@ -131,9 +150,11 @@ class DecoderWithContextRevised(nn.Module):
     Decoder.
     """
 
-    def __init__(self, attention_dim, embed_dim, decoder_dim, vocab_size, encoder_dim=2048, article_maxlen=512, article_downlen=500, dropout=0.5, context_encoder_path=None):
+    def __init__(self, attention_dim, embed_dim, decoder_dim, vocab_size, encoder_dim=2048, dropout=0.5,
+                 context_encoder_path=None, attention_type='bahdanau'):
         # article_maxlen used to be 502
         """
+        :param attention_type:
         :param attention_dim: size of attention network
         :param embed_dim: embedding size
         :param decoder_dim: size of decoder's RNN
@@ -161,7 +182,7 @@ class DecoderWithContextRevised(nn.Module):
         self.dropout = dropout
 
         # 2048, 512 + 196, 512 + 196
-        self.attentionImgEncoder = Attention(encoder_dim, decoder_dim, attention_dim)  # attention network
+        self.attentionImgEncoder = Attention(encoder_dim, decoder_dim, attention_dim, 'additive')  # attention network
         self.attentionContEncoder = AttentionWContext(768, decoder_dim, attention_dim)  # attention network
 
         self.embedding = nn.Embedding(vocab_size, embed_dim)  # embedding layer

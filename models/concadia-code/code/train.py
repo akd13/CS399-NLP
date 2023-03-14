@@ -106,12 +106,9 @@ def run_training():
     # keeps track of number of epochs since there's been an improvement in validation BLEU
     epochs_since_improvement = 0
 
-    decoder = DecoderWithContextRevised(attention_dim=attention_dim,
-                                        embed_dim=emb_dim,
-                                        decoder_dim=decoder_dim,
+    decoder = DecoderWithContextRevised(attention_dim=attention_dim, embed_dim=emb_dim, decoder_dim=decoder_dim,
                                         vocab_size=len(word_map),
-                                        dropout=dropout,
-                                        encoder_dim=image_encoder_dims[args.image_encoder_type],
+                                        encoder_dim=image_encoder_dims[args.image_encoder_type], dropout=dropout,
                                         context_encoder_path=context_encoder_path)
     decoder_optimizer = torch.optim.Adam(params=filter(lambda p: p.requires_grad, decoder.parameters()),
                                             lr=decoder_lr)
