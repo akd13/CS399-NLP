@@ -1,0 +1,2 @@
+label_cond,context_cond,randomized,nlg_type,context_encoder_type,run_id,Bleu_1,Bleu_2,Bleu_3,Bleu_4,CIDEr,METEOR,ROUGE_L
+description,context,none,densenet-lstm,roberta,20230304_193458,0.1477754395188124,0.08050390442264464,0.04883212822637075,0.03103364044269291,0.04045340912841441,0.07349377463036255,0.18458542963681582

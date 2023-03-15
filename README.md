@@ -1,17 +1,18 @@
 # Set up env
-1. Navigate to the root directory of the project `cd CS224N/CS399-NLP/`
-1. Create a virtual environment - `pip install virtualenv`
+1. Navigate to the root directory of the project - `cd CS399-NLP/`
+1. Create a virtual environment
+    2. `pip install virtualenv`
+    2. `virtualenv venv` 
 2. Activate the virtual environment - `source venv/bin/activate`
 3. Install the requirements - `pip install -r requirements.txt`
 
 # Data Collection
 This project is to collect datasets for the task of generating descriptions for charts and graphs. 
 The datasets are collected from the following sources:
-1. Wikipedia
+1. Wikipedia (Concadia)
 2. Statista
 3. Pew
-4. Accessbility Journals
-5. 
+4. Accessbility Journals (HCI)
 ## Collecting the data
 1. Concadia
     1. Download `wiki_split.json` and `resized.zip`. 
@@ -29,4 +30,8 @@ The datasets are collected from the following sources:
     1. Statista
     2. Pew
 ## Formatting the Data
-Coming soon
+1. Navigate to inside the project, and `cd models/concadia-code/code`
+2. To create embeddings, ensure that your dataset has all images inside directory `images` and has the metadata in 
+`images.json`, then do the following - 
+    3. ` python3 create_input_files.py none --dataset <dataset> --root_dir ../../../datasets`
+2.  4.  `python3 create_input_files.py context --dataset <dataset> --root_dir ../../../datasets` 
