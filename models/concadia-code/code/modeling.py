@@ -102,7 +102,7 @@ class Attention(nn.Module):
         if self.attention_type == 'additive':
             att = self.full_att(self.relu(att1 + att2.unsqueeze(1))).squeeze(2)  # (batch_size, num_pixels)
         elif self.attention_type == 'multiplicative':
-            att = self.full_att(self.tanh(att1 * att2.unsqueeze(1))).squeeze(2)  # (batch_size, num_pixels)
+            att = self.full_att(self.tanh(att1 * att2)).squeeze(2)  # (batch_size, num_pixels)
         elif self.attention_type == 'dot':
             att = self.full_att(self.dot(att1 * att2.unsqueeze(1))).squeeze(2)
         elif self.attention_type == 'bahdanau':
@@ -158,7 +158,7 @@ class AttentionWContext(nn.Module):
         if self.attention_type == 'additive':
             att = self.full_att(self.relu(att1 + att2.unsqueeze(1))).squeeze(2)  # (batch_size, num_pixels)
         elif self.attention_type == 'multiplicative':
-            att = self.full_att(self.tanh(att1 * att2.unsqueeze(1))).squeeze(2)  # (batch_size, num_pixels)
+            att = self.full_att(self.tanh(att1 * att2)).squeeze(2)  # (batch_size, num_pixels)
         elif self.attention_type == 'dot':
             att = self.full_att(self.dot(att1 * att2.unsqueeze(1))).squeeze(2)
         else:
