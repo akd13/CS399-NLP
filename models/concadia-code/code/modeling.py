@@ -131,6 +131,7 @@ class AttentionWContext(nn.Module):
         self.encoder_att = nn.Linear(encoder_dim, attention_dim)  # linear layer to transform encoded image
         self.decoder_att = nn.Linear(decoder_dim + 768, attention_dim)  # linear layer to transform decoder's output
         self.full_att = nn.Linear(attention_dim, 1)  # linear layer to calculate values to be softmax-ed
+        self.attention_type = attention_type
         if attention_type == 'additive':
             self.relu = nn.ReLU()
         elif attention_type == 'multiplicative':
