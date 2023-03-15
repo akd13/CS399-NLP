@@ -4,7 +4,7 @@ from unicode_to_ascii import unicode_to_ascii
 from nltk.tokenize import word_tokenize
 
 root = 'datasets/'
-filenames = ['hci/hci.json','images/images.json','downsampled_images/images.json','concadia/concadia.json',
+filenames = ['hci/hci.json','concadia/concadia.json',
              'pew/pew.json','statista/statista.json']
 unicode_regex = re.compile(r'\\u[0-9a-fA-F]{4}')
 
