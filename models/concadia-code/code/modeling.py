@@ -79,7 +79,7 @@ class Attention(nn.Module):
         if attention_type == 'additive':
             self.relu = nn.ReLU()
         elif attention_type == 'multiplicative':
-            self.tanh = nn.Tanh()
+            self.relu = nn.ReLU()
         elif attention_type == 'dot':
             self.dot = nn.Linear(decoder_dim, 1)
         elif attention_type == 'bahdanau':
@@ -103,7 +103,7 @@ class Attention(nn.Module):
             att = self.full_att(self.relu(att1 + att2.unsqueeze(1))).squeeze(2)  # (batch_size, num_pixels)
         elif self.attention_type == 'multiplicative':
             att2 = att2.unsqueeze(1)  # (batch_size, 1, attention_dim)
-            att = self.full_att(self.tanh(att1 * att2)).squeeze(2)  # (batch_size, num_pixels)
+            att = self.full_att(self.relu(att1 * att2)).squeeze(2)  # (batch_size, num_pixels)
         elif self.attention_type == 'dot':
             att = self.full_att(self.dot(att1 * att2.unsqueeze(1))).squeeze(2)
         elif self.attention_type == 'bahdanau':
@@ -136,7 +136,7 @@ class AttentionWContext(nn.Module):
         if attention_type == 'additive':
             self.relu = nn.ReLU()
         elif attention_type == 'multiplicative':
-            self.tanh = nn.Tanh()
+            self.relu = nn.ReLU()
         elif attention_type == 'dot':
             self.dot = nn.Linear(decoder_dim, 1)
         elif attention_type == 'bahdanau':
@@ -160,7 +160,7 @@ class AttentionWContext(nn.Module):
             att = self.full_att(self.relu(att1 + att2.unsqueeze(1))).squeeze(2)  # (batch_size, num_pixels)
         elif self.attention_type == 'multiplicative':
             att2 = att2.unsqueeze(1)  # (batch_size, 1, attention_dim)
-            att = self.full_att(self.tanh(att1 * att2)).squeeze(2)  # (batch_size, num_pixels)
+            att = self.full_att(self.relu(att1 * att2)).squeeze(2)  # (batch_size, num_pixels)
         elif self.attention_type == 'dot':
             att = self.full_att(self.dot(att1 * att2.unsqueeze(1))).squeeze(2)
         else:
