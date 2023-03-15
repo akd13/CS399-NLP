@@ -7,6 +7,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 MAX_LEN_GREEDY_DECODING = 50
 
+
 class Encoder(nn.Module):
     """
     Encoder.
@@ -85,6 +86,61 @@ class Attention(nn.Module):
             self.W = nn.Linear(attention_dim, attention_dim)
             self.tanh = nn.Tanh()
         else:
+            raise ValueError("`attention_type` must be either 'additive', 'multiplicative', 'dot' or 'bahdanau'")
+        self.softmax = nn.Softmax(dim=1)  # softmax layer to calculate weights
+
+    def forward(self, encoder_out, decoder_hidden):
+        """
+        Forward propagation.
+
+        :param encoder_out: encoded images, a tensor of dimension (batch_size, num_pixels, encoder_dim)
+        :param decoder_hidden: previous decoder output, a tensor of dimension (batch_size, decoder_dim)
+        :return: attention weighted encoding, weights
+        """
+        att1 = self.encoder_att(encoder_out)  # (batch_size, num_pixels, attention_dim)
+        att2 = self.decoder_att(decoder_hidden)  # (batch_size, attention_dim)
+        if self.attention_type == 'additive':
+            att = self.full_att(self.relu(att1 + att2.unsqueeze(1))).squeeze(2)  # (batch_size, num_pixels)
+        elif self.attention_type == 'multiplicative':
+            att = self.full_att(self.tanh(att1 * att2.unsqueeze(1))).squeeze(2)  # (batch_size, num_pixels)
+        elif self.attention_type == 'dot':
+            att = self.full_att(self.dot(att1 * att2.unsqueeze(1))).squeeze(2)
+        elif self.attention_type == 'bahdanau':
+            att = self.full_att(self.tanh(self.W(att1 + att2.unsqueeze(1)))).squeeze(2)
+        else:
+            raise ValueError("`attention_type` must be either 'additive', 'multiplicative', 'dot' or 'bahdanau'")
+        alpha = self.softmax(att)  # (batch_size, num_pixels)
+        attention_weighted_encoding = (encoder_out * alpha.unsqueeze(2)).sum(dim=1)  # (batch_size, encoder_dim)
+
+        return attention_weighted_encoding, alpha
+
+
+class AttentionWContext(nn.Module):
+    """
+    Attention Network.
+    """
+
+    def __init__(self, encoder_dim, decoder_dim, attention_dim, attention_type='additive'):
+        """
+        :param attention_type:
+        :param encoder_dim: feature size of encoded images
+        :param decoder_dim: size of decoder's RNN
+        :param attention_dim: size of the attention network
+        """
+        super(AttentionWContext, self).__init__()
+        self.encoder_att = nn.Linear(encoder_dim, attention_dim)  # linear layer to transform encoded image
+        self.decoder_att = nn.Linear(decoder_dim + 768, attention_dim)  # linear layer to transform decoder's output
+        self.full_att = nn.Linear(attention_dim, 1)  # linear layer to calculate values to be softmax-ed
+        if attention_type == 'additive':
+            self.relu = nn.ReLU()
+        elif attention_type == 'multiplicative':
+            self.tanh = nn.Tanh()
+        elif attention_type == 'dot':
+            self.dot = nn.Linear(decoder_dim, 1)
+        elif attention_type == 'bahdanau':
+            self.W = nn.Linear(attention_dim, attention_dim)
+            self.tanh = nn.Tanh()
+        else:
             raise ValueError("`attention_type` must be either 'additive', 'multiplicative' or 'dot'")
         self.softmax = nn.Softmax(dim=1)  # softmax layer to calculate weights
 
@@ -108,50 +164,16 @@ class Attention(nn.Module):
             att = self.full_att(self.relu(att1 + att2.unsqueeze(1))).squeeze(2)  # (batch_size, num_pixels)
         alpha = self.softmax(att)  # (batch_size, num_pixels)
         attention_weighted_encoding = (encoder_out * alpha.unsqueeze(2)).sum(dim=1)  # (batch_size, encoder_dim)
-
         return attention_weighted_encoding, alpha
 
-class AttentionWContext(nn.Module):
-    """
-    Attention Network.
-    """
 
-    def __init__(self, encoder_dim, decoder_dim, attention_dim, article_dim=None):
-        """
-        :param encoder_dim: feature size of encoded images
-        :param decoder_dim: size of decoder's RNN
-        :param attention_dim: size of the attention network
-        """
-        super(AttentionWContext, self).__init__()
-        self.encoder_att = nn.Linear(encoder_dim, attention_dim)  # linear layer to transform encoded image
-        self.decoder_att = nn.Linear(decoder_dim + 768, attention_dim)  # linear layer to transform decoder's output
-        self.full_att = nn.Linear(attention_dim, 1)  # linear layer to calculate values to be softmax-ed
-        self.relu = nn.ReLU()
-        self.softmax = nn.Softmax(dim=1)  # softmax layer to calculate weights
-
-    def forward(self, encoder_out, decoder_hidden):
-        """
-        Forward propagation.
-
-        :param encoder_out: encoded images, a tensor of dimension (batch_size, num_pixels, encoder_dim)
-        :param decoder_hidden: previous decoder output, a tensor of dimension (batch_size, decoder_dim)
-        :return: attention weighted encoding, weights
-        """
-        att1 = self.encoder_att(encoder_out)  # (batch_size, num_pixels, attention_dim)
-        att2 = self.decoder_att(decoder_hidden)  # (batch_size, attention_dim)
-        att = self.full_att(self.relu(att1 + att2.unsqueeze(1))).squeeze(2)  # (batch_size, num_pixels)
-        alpha = self.softmax(att)  # (batch_size, num_pixels)
-        attention_weighted_encoding = (encoder_out * alpha.unsqueeze(2)).sum(dim=1)  # (batch_size, encoder_dim)
-
-
-        return attention_weighted_encoding, alpha
 class DecoderWithContextRevised(nn.Module):
     """
     Decoder.
     """
 
     def __init__(self, attention_dim, embed_dim, decoder_dim, vocab_size, encoder_dim=2048, dropout=0.5,
-                 context_encoder_path=None, attention_type='bahdanau'):
+                 context_encoder_path=None, attention_type='additive'):
         # article_maxlen used to be 502
         """
         :param attention_type:
@@ -164,15 +186,15 @@ class DecoderWithContextRevised(nn.Module):
         """
         super(DecoderWithContextRevised, self).__init__()
 
-        self.bert = AutoModel.from_pretrained(context_encoder_path if context_encoder_path is not None else 'bert-base-uncased',
-                                  output_hidden_states = True # Whether the model returns all hidden-states.
-                                #   output_all_encoded_layers=False
-                                  )
+        self.bert = AutoModel.from_pretrained(
+            context_encoder_path if context_encoder_path is not None else 'bert-base-uncased',
+            output_hidden_states=True  # Whether the model returns all hidden-states.
+            #   output_all_encoded_layers=False
+            )
 
         # Freeze bert layers
         for p in self.bert.parameters():
             p.requires_grad = False
-
 
         self.encoder_dim = encoder_dim
         self.attention_dim = attention_dim
@@ -182,7 +204,8 @@ class DecoderWithContextRevised(nn.Module):
         self.dropout = dropout
 
         # 2048, 512 + 196, 512 + 196
-        self.attentionImgEncoder = Attention(encoder_dim, decoder_dim, attention_dim, 'additive')  # attention network
+        self.attentionImgEncoder = Attention(encoder_dim, decoder_dim, attention_dim,
+                                             attention_type)  # attention network
         self.attentionContEncoder = AttentionWContext(768, decoder_dim, attention_dim)  # attention network
 
         self.embedding = nn.Embedding(vocab_size, embed_dim)  # embedding layer
@@ -190,13 +213,14 @@ class DecoderWithContextRevised(nn.Module):
         # embed_dim for caption generation (original; independent of article)
         self.decode_step = nn.LSTMCell(embed_dim + encoder_dim + 768, decoder_dim + 768, bias=True)  # decoding LSTMCell
         # embed_dim for article input (here and in the following lines)
-        self.init_h = nn.Linear(encoder_dim + 768, decoder_dim + 768)  # linear layer to find initial hidden state of LSTMCell
-        self.init_c = nn.Linear(encoder_dim + 768, decoder_dim + 768)  # linear layer to find initial cell state of LSTMCell
+        self.init_h = nn.Linear(encoder_dim + 768,
+                                decoder_dim + 768)  # linear layer to find initial hidden state of LSTMCell
+        self.init_c = nn.Linear(encoder_dim + 768,
+                                decoder_dim + 768)  # linear layer to find initial cell state of LSTMCell
         self.f_beta = nn.Linear(decoder_dim + 768, encoder_dim + 768)  # linear layer to create a sigmoid-activated gate
         self.sigmoid = nn.Sigmoid()
         self.fc = nn.Linear(decoder_dim + 768, vocab_size)  # linear layer to find scores over vocabulary
         self.init_weights()  # initialize some layers with the uniform distribution
-
 
     def init_weights(self):
         """
@@ -236,13 +260,13 @@ class DecoderWithContextRevised(nn.Module):
         c = self.init_c(decoder_input)
         return h, c, decoder_input
 
-    def forward(self, 
-                encoder_out, 
-                encoded_captions, 
-                caption_lengths, 
-                encoded_articles, 
-                article_attention_mask, 
-                blank_context, 
+    def forward(self,
+                encoder_out,
+                encoded_captions,
+                caption_lengths,
+                encoded_articles,
+                article_attention_mask,
+                blank_context,
                 blank_context_zeros=False,
                 greedy_decode_from_scratch=False):
         """
@@ -260,7 +284,8 @@ class DecoderWithContextRevised(nn.Module):
         vocab_size = self.vocab_size
 
         # Flatten image
-        encoder_out = encoder_out.view(batch_size, -1, encoder_dim)  # (batch_size, num_pixels, encoder_dim) # [35, 196, 2048]
+        encoder_out = encoder_out.view(batch_size, -1,
+                                       encoder_dim)  # (batch_size, num_pixels, encoder_dim) # [35, 196, 2048]
         num_pixels = encoder_out.size(1)
 
         # Sort input data by decreasing lengths; why? apparent below
@@ -268,10 +293,10 @@ class DecoderWithContextRevised(nn.Module):
         encoder_out = encoder_out[sort_ind]
         encoded_captions = encoded_captions[sort_ind]
         encoded_articles = encoded_articles[sort_ind]
-        article_attention_mask = article_attention_mask[sort_ind] 
+        article_attention_mask = article_attention_mask[sort_ind]
         if greedy_decode_from_scratch:
             # decode from scratch; do not restrict decode lengths
-            caption_lengths = torch.zeros(caption_lengths.shape, dtype=caption_lengths.dtype) 
+            caption_lengths = torch.zeros(caption_lengths.shape, dtype=caption_lengths.dtype)
             caption_lengths = caption_lengths + MAX_LEN_GREEDY_DECODING
             caption_lengths = caption_lengths.to(device)
 
@@ -279,15 +304,15 @@ class DecoderWithContextRevised(nn.Module):
         embeddings = self.embedding(encoded_captions)  # (batch_size, max_caption_length, embed_dim)
 
         if not blank_context:
-            paragraph_emb = self.bert(input_ids=encoded_articles, attention_mask=article_attention_mask).last_hidden_state #[35, 52, 768]
+            paragraph_emb = self.bert(input_ids=encoded_articles,
+                                      attention_mask=article_attention_mask).last_hidden_state  # [35, 52, 768]
         else:
             if blank_context_zeros:
                 paragraph_emb = torch.zeros(batch_size, 52, 768).to(device)
             else:
                 paragraph_emb = torch.ones(batch_size, 52, 768).to(device)
 
-        paragraph_emb_flat = paragraph_emb.sum(axis=1) # [35, 768]
-
+        paragraph_emb_flat = paragraph_emb.sum(axis=1)  # [35, 768]
 
         # Initialize LSTM state
         h, c, decoder_input = self.init_hidden_state(encoder_out, paragraph_emb_flat)  # (batch_size, decoder_dim)
@@ -309,11 +334,12 @@ class DecoderWithContextRevised(nn.Module):
             # attention_weighted_encoding, alpha = self.attention(encoder_out[:batch_size_t],
             #                                                     h[:batch_size_t])
             attention_weighted_ImgEncoding, ImgAlpha = self.attentionImgEncoder(encoder_out[:batch_size_t],
-                                                                h[:batch_size_t])
+                                                                                h[:batch_size_t])
             attention_weighted_ContEncoding, ContAlpha = self.attentionContEncoder(paragraph_emb[:batch_size_t],
-                                                                h[:batch_size_t])
+                                                                                   h[:batch_size_t])
             gate = self.sigmoid(self.f_beta(h[:batch_size_t]))  # gating scalar, (batch_size_t, encoder_dim)
-            merged_attention_weighted_encoding = torch.cat((attention_weighted_ImgEncoding, attention_weighted_ContEncoding), dim=1)
+            merged_attention_weighted_encoding = torch.cat(
+                (attention_weighted_ImgEncoding, attention_weighted_ContEncoding), dim=1)
             merged_alpha = torch.cat((ImgAlpha, ContAlpha), dim=1)
             attention_weighted_encoding = gate * merged_attention_weighted_encoding
 

@@ -109,7 +109,8 @@ def run_training():
     decoder = DecoderWithContextRevised(attention_dim=attention_dim, embed_dim=emb_dim, decoder_dim=decoder_dim,
                                         vocab_size=len(word_map),
                                         encoder_dim=image_encoder_dims[args.image_encoder_type], dropout=dropout,
-                                        context_encoder_path=context_encoder_path)
+                                        context_encoder_path=context_encoder_path,
+                                        attention_type=args.attention_type,)
     decoder_optimizer = torch.optim.Adam(params=filter(lambda p: p.requires_grad, decoder.parameters()),
                                             lr=decoder_lr)
     encoder = Encoder(encoder_type=args.image_encoder_type)
@@ -590,6 +591,9 @@ if __name__ == '__main__':
     parser.add_argument('--data_dir', type=str,
                         default='../../../datasets/parsed_data/',
                         help="Where data for model training and eval is stored")
+    parser.add_argument('--attention_type', type=str, default='additive',
+                        choices=['additive', 'multiplicative','dot', 'bahdanau'],
+                        help='Attention type.')
     parser.add_argument('--output_dir', type=str,
                         default='.',
                         help="Where to output run metrics and checkpoints")
@@ -641,6 +645,7 @@ if __name__ == '__main__':
         'grad_clip': str(grad_clip),
         'alpha_c': str(alpha_c),
         'fine_tune_encoder': str(fine_tune_encoder),
+        'attention_type': str(args.attention_type)
     }
 
     with open(os.path.join(run_dir, 'specs.json'), 'w') as json_file:
