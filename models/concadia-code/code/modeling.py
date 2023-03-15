@@ -80,13 +80,11 @@ class Attention(nn.Module):
             self.relu = nn.ReLU()
         elif attention_type == 'multiplicative':
             self.relu = nn.ReLU()
-        elif attention_type == 'dot':
-            self.dot = nn.Linear(decoder_dim, 1)
         elif attention_type == 'bahdanau':
             self.W = nn.Linear(attention_dim, attention_dim)
             self.tanh = nn.Tanh()
         else:
-            raise ValueError("`attention_type` must be either 'additive', 'multiplicative', 'dot' or 'bahdanau'")
+            raise ValueError("`attention_type` must be either 'additive', 'multiplicative' or 'bahdanau'")
         self.softmax = nn.Softmax(dim=1)  # softmax layer to calculate weights
 
     def forward(self, encoder_out, decoder_hidden):
@@ -104,12 +102,10 @@ class Attention(nn.Module):
         elif self.attention_type == 'multiplicative':
             att2 = att2.unsqueeze(1)  # (batch_size, 1, attention_dim)
             att = self.full_att(self.relu(att1 * att2)).squeeze(2)  # (batch_size, num_pixels)
-        elif self.attention_type == 'dot':
-            att = self.full_att(self.dot(att1 * att2.unsqueeze(1))).squeeze(2)
         elif self.attention_type == 'bahdanau':
             att = self.full_att(self.tanh(self.W(att1 + att2.unsqueeze(1)))).squeeze(2)
         else:
-            raise ValueError("`attention_type` must be either 'additive', 'multiplicative', 'dot' or 'bahdanau'")
+            raise ValueError("`attention_type` must be either 'additive', 'multiplicative' or 'bahdanau'")
         alpha = self.softmax(att)  # (batch_size, num_pixels)
         attention_weighted_encoding = (encoder_out * alpha.unsqueeze(2)).sum(dim=1)  # (batch_size, encoder_dim)
 
@@ -137,13 +133,11 @@ class AttentionWContext(nn.Module):
             self.relu = nn.ReLU()
         elif attention_type == 'multiplicative':
             self.relu = nn.ReLU()
-        elif attention_type == 'dot':
-            self.dot = nn.Linear(decoder_dim, 1)
         elif attention_type == 'bahdanau':
             self.W = nn.Linear(attention_dim, attention_dim)
             self.tanh = nn.Tanh()
         else:
-            raise ValueError("`attention_type` must be either 'additive', 'multiplicative' or 'dot'")
+            raise ValueError("`attention_type` must be either 'additive', 'multiplicative' or 'bahdanau'")
         self.softmax = nn.Softmax(dim=1)  # softmax layer to calculate weights
 
     def forward(self, encoder_out, decoder_hidden):
@@ -161,8 +155,6 @@ class AttentionWContext(nn.Module):
         elif self.attention_type == 'multiplicative':
             att2 = att2.unsqueeze(1)  # (batch_size, 1, attention_dim)
             att = self.full_att(self.relu(att1 * att2)).squeeze(2)  # (batch_size, num_pixels)
-        elif self.attention_type == 'dot':
-            att = self.full_att(self.dot(att1 * att2.unsqueeze(1))).squeeze(2)
         else:
             att = self.full_att(self.relu(att1 + att2.unsqueeze(1))).squeeze(2)  # (batch_size, num_pixels)
         alpha = self.softmax(att)  # (batch_size, num_pixels)

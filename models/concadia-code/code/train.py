@@ -592,7 +592,7 @@ if __name__ == '__main__':
                         default='../../../datasets/parsed_data/',
                         help="Where data for model training and eval is stored")
     parser.add_argument('--attention_type', type=str, default='additive',
-                        choices=['additive', 'multiplicative','dot', 'bahdanau'],
+                        choices=['additive', 'multiplicative', 'bahdanau'],
                         help='Attention type.')
     parser.add_argument('--output_dir', type=str,
                         default='.',
