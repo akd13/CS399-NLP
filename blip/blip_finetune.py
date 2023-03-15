@@ -27,17 +27,25 @@ config_text = BlipTextConfig(max_position_embeddings=1024)
 config_vision = BlipVisionConfig()
 config = BlipConfig.from_text_vision_configs(config_text, config_vision)
 
+import torch
+torch.cuda.empty_cache()
+
 #model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
 model = BlipForConditionalGeneration(config)
 print("Config ", model.config)
 
+def transforms(examples):
+    examples["image"] = [image.convert("RGB").resize((100,100)) for image in examples["image"]]
+    return examples
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 
-images_path = '../datasets/downsampled_images'
+images_path = '../datasets/pew/imgs'
 
 dataset = load_dataset("imagefolder", data_dir=images_path, split="train")
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+dataset = dataset.map(transforms, batched=True)
 
 train_dataset = dataset.filter(lambda example: example["split"] == "train")
 v_dataset = dataset.filter(lambda example: example["split"] == "val")
@@ -75,11 +83,16 @@ class ContextDataset(Dataset):
     def __getitem__(self, idx):
         item = self.dataset[idx]
         tokenized_context = item["context"]
+        image = item["image"]
+        print("Image size ", image.size)
+
+        # Resize image here, before you pass to the encoder?
+
         encoding = self.processor(images=item["image"], text=item["label"], padding="max_length", return_tensors="pt")
         # remove batch dimension
 
-
         encoding = {k:v.squeeze() for k,v in encoding.items()}
+    #    print("Shape of input IDs ", encoding['input_ids'].shape)
 
         encoded_context = tokenizer.encode_plus(
                 text=item["context"],  # the sentence to be encoded
@@ -90,8 +103,14 @@ class ContextDataset(Dataset):
                 return_attention_mask = True,  # Generate the attention mask
                 return_tensors = 'pt',  # ask the function to return PyTorch tensors
         )
-        #print("Shape of encoded context ", encoded_context['input_ids'].size())
-        #print("Shape of encoding input IDS ", encoding['input_ids'].size())
+        print("Shape of encoded context ", encoded_context['input_ids'].size())
+        print("Shape of encoding input IDS ", encoding['input_ids'].size()[0])
+        # Weird truncation for batch training
+
+        if (encoding['input_ids'].size()[0] > 512):
+            print("Reducing encoding input_ids size")
+
+            encoding['input_ids'] = encoding['input_ids'].view([512])
 
         encoded_context['input_ids'] = torch.squeeze(encoded_context['input_ids'])
         encoding['input_ids'] = torch.cat((encoding['input_ids'], encoded_context['input_ids']))
@@ -101,8 +120,8 @@ class ContextDataset(Dataset):
 train_dataset = ContextDataset(train_dataset, feature_extractor)
 valid_dataset = ContextDataset(train_dataset, feature_extractor)
 
-train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=1)
-valid_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=1)
+train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=4)
+valid_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=4)
 
 optimizer = torch.optim.AdamW(model.parameters(), lr=5e-5)
 
@@ -111,7 +130,7 @@ model.to(device)
 
 model.train()
 
-for epoch in range(1):
+for epoch in range(3):
     print("Epoch:", epoch)
     for idx, batch in enumerate(train_dataloader):
         #print("Idx ", idx)
@@ -163,7 +182,7 @@ for i, example in enumerate(test_dataset):
 
   inputs = feature_extractor(images=image, return_tensors="pt").to(device)
   pixel_values = inputs.pixel_values
-
+ 
   generated_ids = model.generate(pixel_values=pixel_values, max_length=200)
   generated_caption = feature_extractor.batch_decode(generated_ids, skip_special_tokens=True)[0]
   hypotheses.append(generated_caption)
