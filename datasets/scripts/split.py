@@ -1,8 +1,10 @@
 import json
 import random
-
-split_files = ['../downsampled_images/images.json', '../images/images.json']
-
+import os
+# split_files = ['../downsampled_images/images.json', '../images/images.json']
+split_files = ['hci/hci.json','concadia/concadia.json',
+             'pew/pew.json','statista/statista.json']
+print(os.getcwd())
 for file in split_files:
     with open(file, 'r') as f:
         data = json.load(f)
