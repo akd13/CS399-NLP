@@ -33,5 +33,7 @@ The datasets are collected from the following sources:
 1. Navigate to inside the project, and `cd models/concadia-code/code`
 2. To create embeddings, ensure that your dataset has all images inside directory `images` and has the metadata in 
 `images.json`, then do the following - 
-    3. ` python3 create_input_files.py none --dataset <dataset> --root_dir ../../../datasets`
-2.  4.  `python3 create_input_files.py context --dataset <dataset> --root_dir ../../../datasets` 
+    3. No Context` python3 create_input_files.py none --dataset <dataset> --root_dir ../../../datasets`
+    4. Context `python3 create_input_files.py context --dataset <dataset> --root_dir ../../../datasets` 
+5. To train the model, do the following - 
+    6. No context`python3 train.py --dataset <dataset> --root_dir ../../../datasets`
