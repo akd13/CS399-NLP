@@ -45,7 +45,7 @@ def sample_output(run_id, data, checkpoint_path, label, context, nlg_type, conte
 
         # Generating model output
         try:
-            image_fn = os.path.join(args.data_dir,  img_data['filename'])
+            image_fn = os.path.join(args.data_dir, args.train_dataset, img_data['filename'])
             if context == "none": # should not be executed
                 seq, _ = caption.label_image_beam_search(encoder, decoder, image_fn, word_map, beam_size, gpu_id=args.gpu_id)
             else:
@@ -81,15 +81,20 @@ if __name__ == '__main__':
     parser.add_argument('--runs_dir', type=str,
                         default='/home/ubuntu/s3-drive',
                         help="Where checkpoints from all runs are saved")
+    parser.add_argument('--train_dataset', type=str, default='concadia',
+                        choices=['hci', 'statista','pew','concadia'],
+                        help="Which dataset to use for testing")
+    parser.add_argument('--test_dataset', type=str, default='hci',
+                        choices=['hci', 'statista','pew','concadia'],
+                        help="Which dataset to use for testing")
     parser.add_argument('--wandb_project', type=str, required=True,
                         help="The wandb project where all runs are tracked, of the format '<user_name>/concadia'")
-
     args = parser.parse_args()
     print(args)
 
     # Load data
     print("Loading data ...")
-    with open(os.path.join(args.data_dir, args.data_dir.split('/')[-1])+'.json', 'r') as json_file:
+    with open(os.path.join(args.data_dir, args.train_dataset, args.train_dataset+'.json', 'r')) as json_file:
         data = json.load(json_file)
     datapoints = data['images']
     data = [dp for dp in datapoints if dp['split'] == 'test']
@@ -120,8 +125,7 @@ if __name__ == '__main__':
     for data_location, curr_runs in runs_by_data_location.items():
         # Load word map (word2ix)
         print("Loading word map")
-
-        with open(os.path.join(data_location, "WORDMAP_{}_1_min_word_freq.json".format(args.data_dir.split('/')[-1])), 'r') as j:
+        with open(os.path.join(data_location, "WORDMAP_{}_1_min_word_freq.json".format(args.train_dataset), 'r')) as j:
             word_map = json.load(j)
         rev_word_map = {v: k for k, v in word_map.items()}  # ix2word
 
