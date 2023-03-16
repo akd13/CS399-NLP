@@ -101,10 +101,9 @@ if __name__ == '__main__':
 
     # Load data
     print("Loading data ...")
-    with open(os.path.join(args.data_dir, args.train_dataset, args.train_dataset + '.json'), 'r') as json_file:
+    with open(os.path.join(args.data_dir, args.test_dataset, args.train_dataset + '.json'), 'r') as json_file:
         data = json.load(json_file)
-    datapoints = data['images']
-    data = [dp for dp in datapoints if dp['split'] == 'test']
+    data = data['images']
     if args.debug:
         data = data[:2]
     print("Num testing examples: " + str(len(data)))
