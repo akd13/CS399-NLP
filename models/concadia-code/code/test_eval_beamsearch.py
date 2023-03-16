@@ -131,7 +131,7 @@ if __name__ == '__main__':
     for data_location, curr_runs in runs_by_data_location.items():
         # Load word map (word2ix)
         print("Loading word map")
-        with open(os.path.join(data_location, "WORDMAP_{}_1_min_word_freq.json".format(args.train_dataset), 'r')) as j:
+        with open(os.path.join(data_location, "WORDMAP_{}_1_min_word_freq.json".format(args.train_dataset)), 'r') as j:
             word_map = json.load(j)
         rev_word_map = {v: k for k, v in word_map.items()}  # ix2word
 
