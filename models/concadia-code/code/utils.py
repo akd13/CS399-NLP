@@ -17,7 +17,7 @@ import sys
 # from os import path
 
 
-def create_input_files(root_dir, json_path, image_folder, labels_per_image, context, min_word_freq, output_folder, max_len=512):
+def create_input_files(root_dir, json_path, image_folder, image_subdir, labels_per_image, context, min_word_freq, output_folder, max_len=512):
     """
     Creates input files for training, validation, and test data.
 
@@ -29,11 +29,11 @@ def create_input_files(root_dir, json_path, image_folder, labels_per_image, cont
     :param max_len: don't sample labels longer than this length
     """
 
-    dataset = "wikipedia"
+    dataset = image_folder
 
     # Read JSON
     # TODO: check image folder path
-    with open(os.path.join(root_dir, image_folder ,json_path), 'r') as j:
+    with open(os.path.join(root_dir, image_folder, json_path), 'r') as j:
         data = json.load(j)
 
     if not os.path.exists(os.path.join(root_dir, output_folder)):
@@ -116,7 +116,7 @@ def create_input_files(root_dir, json_path, image_folder, labels_per_image, cont
         if (context != "none") and (len(contexts) == 0):
             continue
 
-        path = os.path.join(root_dir, image_folder, img['filename'])
+        path = os.path.join(root_dir, image_folder, image_subdir, img['filename']) #TODO: fix path
 
         if idx in train_imgs:
             train_image_paths.append(path)
