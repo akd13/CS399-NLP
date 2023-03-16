@@ -597,13 +597,15 @@ if __name__ == '__main__':
     parser.add_argument('--output_dir', type=str,
                         default='.',
                         help="Where to output run metrics and checkpoints")
+    parser.add_argument('--dataset', type=str, default='statista',
+                        choices=['hci', 'concadia', 'pew','statista'],
+                        help='Dataset to train on')
 
     args = parser.parse_args()
 
     # Data parameters
-    #TODO change directory path
     data_folder = os.path.join(args.data_dir, args.context_cond +
-                                'downsampled_images')  # folder with data files saved by create_input_files.py
+                                args.dataset)  # folder with data files saved by create_input_files.py
     data_name = 'wikipedia_1_min_word_freq'  # base name shared by data files
 
     if args.debug:
