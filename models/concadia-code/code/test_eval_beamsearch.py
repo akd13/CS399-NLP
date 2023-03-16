@@ -59,7 +59,7 @@ def sample_output(run_id, data, checkpoint_path, label, context, nlg_type, conte
             generated_label = " ".join([rev_word_map[ind] for ind in seq])
             generated_label = generated_label.replace('<start> ', '')
             generated_label = generated_label.replace(' <end>', '')
-            sample = [run_id, beam_size, img_data['filename'], raw_label, img_data[context]['raw'], generated_label]
+            sample = [run_id, args.train_dataset, args.test_dataset, beam_size, img_data['filename'], raw_label, img_data[context]['raw'], generated_label]
             beamsearch_perf.append(sample)
         except Exception as error_msg:
             print("An exception occurred.")
