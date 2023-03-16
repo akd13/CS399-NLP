@@ -7,7 +7,7 @@ original_dir = 'statista-large/imgs/'
 new_dir = 'statista/imgs/'
 
 # Define the downsampling factor (1/10th in this case)
-downsampling_factor = 5
+downsampling_factor = 2
 
 # Create the new directory
 os.makedirs(new_dir, exist_ok=True)

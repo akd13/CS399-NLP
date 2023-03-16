@@ -2,9 +2,9 @@ import os
 import json
 import pandas as pd
 
-downsampled_images = set(os.listdir('../downsampled_images'))
-
-df = pd.read_json('../images/images.json')
+downsampled_images = set(os.listdir('statista-large/imgs/'))
+print(len(downsampled_images))
+df = pd.read_json('statista-large/statista-large.json')
 
 filtered_rows = []
 for i, row in df['images'].items():
@@ -14,5 +14,5 @@ for i, row in df['images'].items():
 
 print(len(filtered_rows))
 
-with open('../downsampled_images/images.json', 'w') as f:
-    json.dump({'images': filtered_rows}, f)
+with open('statista/statista.json', 'w') as f:
+    json.dump({'images': filtered_rows}, f, ensure_ascii=False)

@@ -1,6 +1,6 @@
 import json
 
-datasets = ['pew', 'hci', 'concadia', 'statista']
+datasets = ['pew', 'hci', 'concadia', 'statista-large','statista']
 for dataset in datasets:
     with open("../" + dataset + "/" + dataset + '.json', 'r') as f:
         json_data = json.load(f)
