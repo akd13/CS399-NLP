@@ -32,7 +32,7 @@ torch.cuda.empty_cache()
 
 #model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
 model = BlipForConditionalGeneration(config)
-print("Config ", model.config)
+#print("Config ", model.config)
 
 def transforms(examples):
     examples["image"] = [image.convert("RGB").resize((100,100)) for image in examples["image"]]
@@ -48,11 +48,11 @@ tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 dataset = dataset.map(transforms, batched=True)
 
 train_dataset = dataset.filter(lambda example: example["split"] == "train")
-v_dataset = dataset.filter(lambda example: example["split"] == "val")
+valid_dataset = dataset.filter(lambda example: example["split"] == "val")
 test_dataset = dataset.filter(lambda example: example["split"] == "test")
 
 print("Length of train dataset ", len(train_dataset))
-print("Length of val dataset ", len(v_dataset))
+print("Length of val dataset ", len(valid_dataset))
 print("Length of test dataset ", len(test_dataset))
 
 class NoContextDataset(Dataset):
@@ -84,9 +84,7 @@ class ContextDataset(Dataset):
         item = self.dataset[idx]
         tokenized_context = item["context"]
         image = item["image"]
-        print("Image size ", image.size)
-
-        # Resize image here, before you pass to the encoder?
+        #print("Image size ", image.size)
 
         encoding = self.processor(images=item["image"], text=item["label"], padding="max_length", return_tensors="pt")
         # remove batch dimension
@@ -103,25 +101,19 @@ class ContextDataset(Dataset):
                 return_attention_mask = True,  # Generate the attention mask
                 return_tensors = 'pt',  # ask the function to return PyTorch tensors
         )
-        print("Shape of encoded context ", encoded_context['input_ids'].size())
-        print("Shape of encoding input IDS ", encoding['input_ids'].size()[0])
-        # Weird truncation for batch training
-
-        if (encoding['input_ids'].size()[0] > 512):
-            print("Reducing encoding input_ids size")
-
-            encoding['input_ids'] = encoding['input_ids'].view([512])
-
         encoded_context['input_ids'] = torch.squeeze(encoded_context['input_ids'])
         encoding['input_ids'] = torch.cat((encoding['input_ids'], encoded_context['input_ids']))
         attn_mask = encoded_context['attention_mask']
         return encoding
 
 train_dataset = ContextDataset(train_dataset, feature_extractor)
-valid_dataset = ContextDataset(train_dataset, feature_extractor)
+valid_dataset = ContextDataset(valid_dataset, feature_extractor)
+
+train_dataset = [image for image in train_dataset if image['input_ids'].shape[0] == 1024]
+#train_dataset = train_dataset.filter(lambda example: example["input_ids"].shape[0] > 1024)
 
 train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=4)
-valid_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=4)
+valid_dataloader = DataLoader(valid_dataset, shuffle=True, batch_size=4)
 
 optimizer = torch.optim.AdamW(model.parameters(), lr=5e-5)
 
@@ -130,6 +122,15 @@ model.to(device)
 
 model.train()
 
+'''for idx, batch in enumerate(train_dataloader):
+        #print("Idx ", idx)
+       # print("Batch ", batch)
+    input_ids = batch.pop("input_ids").to(device)
+    pixel_values = batch.pop("pixel_values").to(device)
+    if (input_ids.shape[1] > 1024):
+        print("Input IDS shape ", input_ids.shape[1])
+   ''' 
+
 for epoch in range(3):
     print("Epoch:", epoch)
     for idx, batch in enumerate(train_dataloader):
@@ -137,6 +138,9 @@ for epoch in range(3):
        # print("Batch ", batch)
         input_ids = batch.pop("input_ids").to(device)
         pixel_values = batch.pop("pixel_values").to(device)
+
+        #print("Input IDS ", input_ids)
+        #print("Input IDS shape ", input_ids.shape)
 
         #print("input ids shape ", input_ids.shape)
         #print("pixel values ", pixel_values.shape)
@@ -160,7 +164,7 @@ for epoch in range(3):
 
 # prepare image for the model
 # load image
-example = v_dataset[10]
+example = valid_dataset[10]
 image = example["image"]
 
 inputs = feature_extractor(images=image, return_tensors="pt").to(device)
