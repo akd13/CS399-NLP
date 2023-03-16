@@ -65,7 +65,8 @@ def sample_output(run_id, data, checkpoint_path, label, context, nlg_type, conte
             print("An exception occurred.")
             print(error_msg)
 
-    filename = os.path.join(output_dir, f"{run_id}.csv")
+    run_id_dataset = run_id+ "_" + args.train_dataset+"_"+args.test_dataset
+    filename = os.path.join(output_dir, f"{run_id_dataset}.csv")
 
     with open(filename, 'w') as csvfile:
         csvwriter = csv.writer(csvfile)
