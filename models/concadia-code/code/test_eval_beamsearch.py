@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
     # Load data
     print("Loading data ...")
-    with open(os.path.join(args.data_dir,'images.json'), 'r') as json_file:
+    with open(os.path.join(args.data_dir, args.data_dir.split('/')[-1])+'.json', 'r') as json_file:
         data = json.load(json_file)
     datapoints = data['images']
     data = [dp for dp in datapoints if dp['split'] == 'test']
@@ -121,7 +121,7 @@ if __name__ == '__main__':
         # Load word map (word2ix)
         print("Loading word map")
 
-        with open(os.path.join(data_location, "WORDMAP_wikipedia_1_min_word_freq.json"), 'r') as j:
+        with open(os.path.join(data_location, "WORDMAP_{}_1_min_word_freq.json".format(args.data_dir.split('/')[-1])), 'r') as j:
             word_map = json.load(j)
         rev_word_map = {v: k for k, v in word_map.items()}  # ix2word
 

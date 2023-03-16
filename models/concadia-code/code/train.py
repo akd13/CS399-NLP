@@ -537,9 +537,6 @@ def validate(val_loader, encoder, decoder, criterion, epoch, context_tokenizer):
                 'hypothesis_greedy': {'text': hyp_from_scratch}
             }
             for hypothesis_type in ['hypothesis', 'hypothesis_greedy']:
-                print("Ref ", ref)
-                print("Hypothesis ", datapoint[hypothesis_type]['text'])
-
                 metrics = nlgeval.compute_metrics(
                     [[ref]], [datapoint[hypothesis_type]['text']])
                 for metric in ['Bleu_2', 'Bleu_4', 'ROUGE_L']:
