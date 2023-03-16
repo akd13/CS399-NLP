@@ -13,5 +13,5 @@ for dataset in datasets:
             entry['label'] = entry['description']['raw']
             del entry['description']
             del entry['caption']
-            json.dump(entry, outfile)
+            json.dump(entry, outfile, ensure_ascii=False)
             outfile.write('\n')
