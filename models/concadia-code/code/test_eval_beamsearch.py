@@ -47,7 +47,7 @@ def sample_output(run_id, data, checkpoint_path, label, context, nlg_type, conte
 
         # Generating model output
         try:
-            image_fn = os.path.join(args.data_dir, args.test_dataset, img_data['filename'])
+            image_fn = os.path.join(args.data_dir, args.test_dataset, args.image_subdir, img_data['filename'])
             if context == "none":  # should not be executed
                 seq, _ = caption.label_image_beam_search(encoder, decoder, image_fn, word_map, beam_size,
                                                          gpu_id=args.gpu_id)
@@ -92,6 +92,8 @@ if __name__ == '__main__':
     parser.add_argument('--test_dataset', type=str, default='hci',
                         choices=['hci', 'statista', 'pew', 'concadia'],
                         help="Which dataset to use for testing")
+    parser.add_argument('--image_subdir', type=str, default='imgs',
+                        help="Which image subdir to choose")
     parser.add_argument('--wandb_project', type=str, required=True,
                         help="The wandb project where all runs are tracked, of the format '<user_name>/concadia'")
     args = parser.parse_args()
