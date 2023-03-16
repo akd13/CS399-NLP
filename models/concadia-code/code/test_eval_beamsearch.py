@@ -101,7 +101,7 @@ if __name__ == '__main__':
 
     # Load data
     print("Loading data ...")
-    with open(os.path.join(args.data_dir, args.test_dataset, args.train_dataset + '.json'), 'r') as json_file:
+    with open(os.path.join(args.data_dir, args.test_dataset, args.test_dataset + '.json'), 'r') as json_file:
         data = json.load(json_file)
     data = data['images']
     if args.debug:
