@@ -1,22 +1,16 @@
-import torch
-import torch.nn.functional as F
-import numpy as np
-import json
-import torchvision.transforms as transforms
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-import skimage.transform
 import argparse
-import imageio
-from imageio import imread
-from PIL import Image
-from utils import *
-from nlgeval import NLGEval
-from torch import nn
-from datasets import *
-from transformers import BertTokenizer
-
 import os
+
+import imageio
+import matplotlib.cm as cm
+import matplotlib.pyplot as plt
+import skimage.transform
+import torch.nn.functional as F
+import torchvision.transforms as transforms
+from torch import nn
+
+from datasets import *
+from utils import *
 
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 

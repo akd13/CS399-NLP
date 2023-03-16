@@ -226,7 +226,12 @@ def create_input_files(root_dir, json_path, train_dataset, image_subdir, labels_
                 if not os.path.exists(impaths[i]):
                     print("file doesn't exist: ", impaths[i])
                     continue
-                img = imread(impaths[i])
+                try:
+                    img = imread(impaths[i])
+                except Exception as e:
+                    print("Error reading image: ", impaths[i])
+                    print(e)
+                    continue
 
                 if len(img.shape) == 2:
                     img = img[:, :, np.newaxis]

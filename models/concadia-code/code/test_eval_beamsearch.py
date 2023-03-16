@@ -1,18 +1,14 @@
-import json
-import random
 import argparse
-from PIL import Image
-from PIL import ImageFont
-from PIL import ImageDraw
-import os
-import caption
-import torch
-import matplotlib.patches as patches
 import csv
-from transformers import AutoTokenizer
-from tqdm import tqdm
+import json
+import os
 
+import torch
 import wandb
+from tqdm import tqdm
+from transformers import AutoTokenizer
+
+import caption
 
 
 def sample_output(run_id, data, checkpoint_path, label, context, nlg_type, context_encoder_type, blank_context,

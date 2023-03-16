@@ -1,26 +1,20 @@
-import time
 import argparse
 import copy
-import os
+import time
 from datetime import datetime
-import sys
-import json
-import csv
 
 import torch.backends.cudnn as cudnn
 import torch.optim
 import torch.utils.data
 import torchvision.transforms as transforms
+import wandb
+from nlgeval import NLGEval
 from torch import nn
 from torch.nn.utils.rnn import pack_padded_sequence
 
-from modeling import Encoder, DecoderWithContextRevised
 from datasets import *
+from modeling import Encoder, DecoderWithContextRevised
 from utils import *
-from nltk.translate.bleu_score import corpus_bleu
-from sentence_transformers import SentenceTransformer
-from nlgeval import NLGEval
-import wandb
 
 NUM_BATCHES_IN_DEBUG = 2
 
