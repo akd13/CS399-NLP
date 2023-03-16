@@ -47,7 +47,7 @@ def sample_output(run_id, data, checkpoint_path, label, context, nlg_type, conte
 
         # Generating model output
         try:
-            image_fn = os.path.join(args.data_dir, args.train_dataset, img_data['filename'])
+            image_fn = os.path.join(args.data_dir, args.test_dataset, img_data['filename'])
             if context == "none":  # should not be executed
                 seq, _ = caption.label_image_beam_search(encoder, decoder, image_fn, word_map, beam_size,
                                                          gpu_id=args.gpu_id)
