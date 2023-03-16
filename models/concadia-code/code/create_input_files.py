@@ -25,6 +25,8 @@ if __name__ == '__main__':
                         default="imgs",
                         help='the name of the image subdir within `root_dir` that houses a decompressed version of '
                              '`resized.zip`')
+    parser.add_argument('--test_dataset', type=str,default="pew",choices=['images', 'pew', 'statista', 'concadia', 'hci'],
+                        help='what should be the test dataset')
     args = parser.parse_args()
 
     json_name = args.dataset
@@ -42,14 +44,7 @@ if __name__ == '__main__':
 
     print("Context ", args.context)
     print("directory:", os.getcwd())
-    create_input_files(root_dir=args.root_dir,
-                       json_path=json_name + '.json',
-                       image_folder=args.dataset,
-                       image_subdir=args.image_subdir,
-                       labels_per_image=1,
-                       context=args.context,
-                       # arxiv paper version:
-                       # min_word_freq=1,
-                       min_word_freq=1,
-                       output_folder='parsed_data/' + args.context + args.dataset + '/',
-                       max_len=300)
+    create_input_files(root_dir=args.root_dir, json_path=json_name + '.json', train_dataset=args.dataset,
+                       image_subdir=args.image_subdir, labels_per_image=1, context=args.context, min_word_freq=1,
+                       output_folder='parsed_data/' + args.context + args.dataset + '/', max_len=300,
+                       test_dataset=args.test_dataset)

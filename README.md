@@ -36,4 +36,4 @@ The datasets are collected from the following sources:
     3. No Context` python3 create_input_files.py none --dataset <dataset> --root_dir ../../../datasets`
     4. Context `python3 create_input_files.py context --dataset <dataset> --root_dir ../../../datasets` 
 5. To train the model, do the following - 
-    6. No context`python3 train.py --dataset <dataset> --root_dir ../../../datasets --dataset statista`
+    6. No context `python3 train.py --image_encoder_type densenet --context_encoder_type roberta description context none --epochs 10 --blank_context`

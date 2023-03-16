@@ -17,24 +17,28 @@ import sys
 # from os import path
 
 
-def create_input_files(root_dir, json_path, image_folder, image_subdir, labels_per_image, context, min_word_freq, output_folder, max_len=512):
+def create_input_files(root_dir, json_path, train_dataset, image_subdir, labels_per_image, context, min_word_freq,
+                       output_folder, max_len=512, test_dataset="pew"):
     """
     Creates input files for training, validation, and test data.
 
+    :param test_dataset:
     :param json_path: path of JSON file with splits and labels
-    :param image_folder: folder with downloaded images
+    :param train_dataset: folder with downloaded images
     :param labels_per_image: number of labels to sample per image
     :param min_word_freq: words occuring less frequently than this threshold are binned as <unk>s
     :param output_folder: folder to save files
     :param max_len: don't sample labels longer than this length
     """
 
-    dataset = image_folder
+    dataset = train_dataset
 
     # Read JSON
     # TODO: check image folder path
-    with open(os.path.join(root_dir, image_folder, json_path), 'r') as j:
+    with open(os.path.join(root_dir, train_dataset, train_dataset+'.json'), 'r') as j:
         data = json.load(j)
+    with open(os.path.join(root_dir, test_dataset, test_dataset+'.json'), 'r') as k:
+        test_data = json.load(k)
 
     if not os.path.exists(os.path.join(root_dir, output_folder)):
         print("creating folder at " + root_dir + output_folder)
@@ -73,27 +77,60 @@ def create_input_files(root_dir, json_path, image_folder, image_subdir, labels_p
     word_freq = Counter()
     random.seed(42)
 
-    print('train split ', int(len(data['images']) * 0.8))
-    print('val split ', int(len(data['images']) * 0.1))
-    print('test split ', int(len(data['images']) * 0.1))
-
     print("Total length ", len(data['images']))
 
-    train_split = int(len(data['images']) * 0.8)
-    test_split = int(len(data['images']) * 0.1)
-    print('train split ', train_split)
-
+    train_split = int(len(data['images']) * 0.9)
+    test_split = int(len(test_data['images']))
+    print('{} train split '.format(train_dataset), train_split)
+    print('{} val split '.format(train_dataset),  int(len(data['images']) * 0.1))
+    print('{} test split '.format(test_dataset), test_split)
     image_idx_list = list(range(0, len(data['images'])))
-                          
+    test_image_idx_list = list(range(0, len(test_data['images'])))
     train_imgs = random.sample(image_idx_list, train_split) # Samples without replacement
-
-    test_idx_list = list(set(image_idx_list) - set(train_imgs))
-
+    test_idx_list = list(test_image_idx_list)
     test_imgs = random.sample(test_idx_list, test_split)
-    val_imgs = list(set(test_idx_list) - set(test_imgs))
+    val_imgs = list(set(image_idx_list) - set(train_imgs))
 
     for idx in range(0, len(data['images'])):
         img = data['images'][idx]
+        labels = []
+        contexts = []
+        # Update word frequency
+        # Word frequency is updated according to all text input (label + potential context)
+        if context != "none":
+            word_freq.update(img['context']['tokens'])
+            word_freq.update(img['caption']['tokens'])
+
+        word_freq.update(img['description']['tokens'])
+
+        if len(img['description']['tokens']) <= max_len:
+            labels.append(img['description']['tokens'])
+
+        if context != "none":
+            contexts.append(img['caption']['raw'] + img['context']['raw'])
+
+        if len(labels) == 0:
+            continue
+        if (context != "none") and (len(contexts) == 0):
+            continue
+
+        path = os.path.join(root_dir, train_dataset, image_subdir, img['filename']) #TODO: fix path
+
+        if idx in train_imgs:
+            train_image_paths.append(path)
+            train_image_labels.append(labels)
+            if context != "none":
+                train_image_contexts.append(contexts)
+        elif idx in val_imgs:
+            val_image_paths.append(path)
+            val_image_labels.append(labels)
+            if context != "none":
+                val_image_contexts.append(contexts)
+        else:
+            print("Error! Image not in train or val set.", idx)
+
+    for idx in range(0, len(test_data['images'])):
+        img = test_data['images'][idx]
         labels = []
         contexts = []
         # Update word frequency
@@ -116,24 +153,15 @@ def create_input_files(root_dir, json_path, image_folder, image_subdir, labels_p
         if (context != "none") and (len(contexts) == 0):
             continue
 
-        path = os.path.join(root_dir, image_folder, image_subdir, img['filename']) #TODO: fix path
+        path = os.path.join(root_dir, test_dataset, image_subdir, img['filename']) #TODO: fix path
 
-        if idx in train_imgs:
-            train_image_paths.append(path)
-            train_image_labels.append(labels)
-            if context != "none":
-                train_image_contexts.append(contexts)
-        elif idx in val_imgs:
-            val_image_paths.append(path)
-            val_image_labels.append(labels)
-            if context != "none":
-                val_image_contexts.append(contexts)
-        elif idx in test_imgs:
+        if idx in test_imgs:
             test_image_paths.append(path)
             test_image_labels.append(labels)
             if context != "none":
                 test_image_contexts.append(contexts)
-
+        else:
+            print("Error! Image not in test set.")
     # Sanity check
     assert len(train_image_paths) == len(train_image_labels)
     assert len(val_image_paths) == len(val_image_labels)

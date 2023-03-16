@@ -53,7 +53,7 @@ decoder_dim = 512  # dimension of decoder RNN
 dropout = 0.5
 # sets device for model and PyTorch tensors
 device = None
-#TODO: M1 training
+# TODO: M1 training
 # if torch.backends.mps.is_available():
 #     device = 'mps'
 if torch.cuda.is_available():
@@ -76,6 +76,7 @@ print_freq = 100  # print training/validation stats every __ batches
 fine_tune_encoder = False  # fine-tune encoder?
 
 save_checkpoint_frequency = 5
+
 
 def run_training():
     """
@@ -110,13 +111,13 @@ def run_training():
                                         vocab_size=len(word_map),
                                         encoder_dim=image_encoder_dims[args.image_encoder_type], dropout=dropout,
                                         context_encoder_path=context_encoder_path,
-                                        attention_type=args.attention_type,)
+                                        attention_type=args.attention_type, )
     decoder_optimizer = torch.optim.Adam(params=filter(lambda p: p.requires_grad, decoder.parameters()),
-                                            lr=decoder_lr)
+                                         lr=decoder_lr)
     encoder = Encoder(encoder_type=args.image_encoder_type)
     encoder.fine_tune(fine_tune_encoder)
     encoder_optimizer = torch.optim.Adam(params=filter(lambda p: p.requires_grad, encoder.parameters()),
-                                            lr=encoder_lr) if fine_tune_encoder else None
+                                         lr=encoder_lr) if fine_tune_encoder else None
 
     nlg_type = f'{args.image_encoder_type}-lstm'
     wandb.init(project="concadia",
@@ -204,7 +205,7 @@ def run_training():
                   blank_img, args.blank_context, "val", epoch, val_metrics)
 
         wandb.log(format_log_metrics(train_metrics, val_metrics,
-                  val_metrics_greedy_decoding, epoch))
+                                     val_metrics_greedy_decoding, epoch))
 
     if start_epoch > best_epoch:
         print('Current resumed run does not have a new best checkpoint.')
@@ -241,7 +242,7 @@ def format_log_metrics(train_m, val_m, val_from_scratch_m, epoch):
     metrics.update({f'{key}/train': val for key, val in train_m.items()})
     metrics.update({f'{key}/val': val for key, val in val_m.items()})
     metrics.update({f'{key}/val_from_scratch': val for key,
-                   val in val_from_scratch_m.items()})
+    val in val_from_scratch_m.items()})
     return metrics
 
 
@@ -423,7 +424,8 @@ def validate(val_loader, encoder, decoder, criterion, epoch, context_tokenizer):
             seqs_from_scratch = torch.LongTensor(
                 [[word_map['<start>']]] * bsz).to(device)
             scores_from_scratch, _, _, _, _ = decoder(imgs, seqs_from_scratch, lablens, contexts, context_mask,
-                                                        args.blank_context, blank_context_zeros, greedy_decode_from_scratch=True)
+                                                      args.blank_context, blank_context_zeros,
+                                                      greedy_decode_from_scratch=True)
 
             # ===== Calculate ML metrics =====
             # Since we decoded starting with <start>, the targets are all words after <start>, up to <end>
@@ -434,10 +436,10 @@ def validate(val_loader, encoder, decoder, criterion, epoch, context_tokenizer):
             scores_copy = scores.detach()
             scores, * \
                 _ = pack_padded_sequence(
-                    scores, decode_lengths, batch_first=True)
+                scores, decode_lengths, batch_first=True)
             targets, * \
                 _ = pack_padded_sequence(
-                    targets, decode_lengths, batch_first=True)
+                targets, decode_lengths, batch_first=True)
 
             # Calculate loss
             raw_loss = criterion(scores, targets)
@@ -475,7 +477,8 @@ def validate(val_loader, encoder, decoder, criterion, epoch, context_tokenizer):
             for j in range(alllabs.shape[0]):
                 img_labs = alllabs[j].tolist()
                 img_labels = list(
-                    map(lambda c: [w for w in c if w not in {word_map['<start>'], word_map['<pad>'], word_map['<end>']}],
+                    map(lambda c: [w for w in c if
+                                   w not in {word_map['<start>'], word_map['<pad>'], word_map['<end>']}],
                         img_labs))  # remove <start> and pads
                 references.append(img_labels)
                 ref_words.append(
@@ -547,7 +550,6 @@ def validate(val_loader, encoder, decoder, criterion, epoch, context_tokenizer):
         with open(filename, 'w') as json_file:
             json.dump(metric_debug_json, json_file, indent=4)
 
-
         def format_nlg_metrics(m):
             return f"BLEU-2 - {m['Bleu_2']:.5f}, BLEU-4 - {m['Bleu_4']:.5f}, CIDEr - {m['CIDEr']:.5f}, ROUGE_L - {m['ROUGE_L']:.3f}"
 
@@ -597,16 +599,16 @@ if __name__ == '__main__':
     parser.add_argument('--output_dir', type=str,
                         default='.',
                         help="Where to output run metrics and checkpoints")
-    parser.add_argument('--dataset', type=str, default='statista',
-                        choices=['hci', 'concadia', 'pew','statista'],
+    parser.add_argument('--dataset', type=str, default='concadia',
+                        choices=['hci', 'concadia', 'pew', 'statista'],
                         help='Dataset to train on')
 
     args = parser.parse_args()
 
     # Data parameters
     data_folder = os.path.join(args.data_dir, args.context_cond +
-                                args.dataset)  # folder with data files saved by create_input_files.py
-    data_name = 'wikipedia_1_min_word_freq'  # base name shared by data files
+                               args.dataset)  # folder with data files saved by create_input_files.py
+    data_name = '{}_1_min_word_freq'.format(args.dataset)  # base name shared by data files
 
     if args.debug:
         # dryrun
