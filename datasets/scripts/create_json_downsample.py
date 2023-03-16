@@ -2,7 +2,7 @@ import os
 import json
 import pandas as pd
 
-downsampled_images = set(os.listdir('statista-large/imgs/'))
+downsampled_images = set(os.listdir('statista/imgs/'))
 print(len(downsampled_images))
 df = pd.read_json('statista-large/statista-large.json')
 
