@@ -228,41 +228,41 @@ def create_input_files(root_dir, json_path, train_dataset, image_subdir, labels_
                     continue
                 try:
                     img = imread(impaths[i])
+
+                    if len(img.shape) == 2:
+                        img = img[:, :, np.newaxis]
+                        img = np.concatenate([img, img, img], axis=2)
+                    img = np.array(Image.fromarray(img).resize(
+                        (256, 256)))  # imresize(img, (256, 256))
+                    img = img[:, :, : 3]
+
+                    img = img.transpose(2, 0, 1)
+
+                    assert img.shape == (3, 256, 256)
+                    assert np.max(img) <= 255
+
+                    # Save image to HDF5 file
+                    images[i] = img
+
+                    for j, c in enumerate(labels):
+                        enc_c = [word_map['<start>']] + [word_map.get(word, word_map['<unk>']) for word in c] + [
+                            word_map['<end>']] + [word_map['<pad>']] * (max_len - len(c))
+
+                        # Find label lengths
+                        c_len = len(c) + 2
+
+                        enc_labels.append(enc_c)
+                        lablens.append(c_len)
+
+                    if context != "none":
+                        d = imcontexts[i]
+                        enc_d = d
+
+                        enc_contexts.append(enc_d)
                 except Exception as e:
                     print("Error reading image: ", impaths[i])
                     print(e)
                     continue
-
-                if len(img.shape) == 2:
-                    img = img[:, :, np.newaxis]
-                    img = np.concatenate([img, img, img], axis=2)
-                img = np.array(Image.fromarray(img).resize(
-                    (256, 256)))  # imresize(img, (256, 256))
-                img = img[:, :, : 3]
-
-                img = img.transpose(2, 0, 1)
-
-                assert img.shape == (3, 256, 256)
-                assert np.max(img) <= 255
-
-                # Save image to HDF5 file
-                images[i] = img
-
-                for j, c in enumerate(labels):
-                    enc_c = [word_map['<start>']] + [word_map.get(word, word_map['<unk>']) for word in c] + [
-                        word_map['<end>']] + [word_map['<pad>']] * (max_len - len(c))
-
-                    # Find label lengths
-                    c_len = len(c) + 2
-
-                    enc_labels.append(enc_c)
-                    lablens.append(c_len)
-
-                if context != "none":
-                    d = imcontexts[i]
-                    enc_d = d
-
-                    enc_contexts.append(enc_d)
 
             # Sanity check
             print(images.shape[0])
@@ -270,7 +270,6 @@ def create_input_files(root_dir, json_path, train_dataset, image_subdir, labels_
             print(len(enc_labels))
             print(len(lablens))
 
-# 7090, 1, 1142, 1142
 
             assert images.shape[0] * \
                 labels_per_image == len(enc_labels) == len(lablens)
