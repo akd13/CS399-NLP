@@ -5,7 +5,7 @@ import json
 import torch
 # from scipy.ndimage import imread, imresize
 from imageio.v2 import imread
-import random 
+import random
 from tqdm import tqdm
 from collections import Counter
 from random import seed, choice, sample
@@ -13,6 +13,8 @@ from PIL import Image
 import pandas as pd
 import glob
 import sys
+
+
 # import os.path
 # from os import path
 
@@ -35,9 +37,9 @@ def create_input_files(root_dir, json_path, train_dataset, image_subdir, labels_
 
     # Read JSON
     # TODO: check image folder path
-    with open(os.path.join(root_dir, train_dataset, train_dataset+'.json'), 'r') as j:
+    with open(os.path.join(root_dir, train_dataset, train_dataset + '.json'), 'r') as j:
         data = json.load(j)
-    with open(os.path.join(root_dir, test_dataset, test_dataset+'.json'), 'r') as k:
+    with open(os.path.join(root_dir, test_dataset, test_dataset + '.json'), 'r') as k:
         test_data = json.load(k)
 
     if not os.path.exists(os.path.join(root_dir, output_folder)):
@@ -82,11 +84,11 @@ def create_input_files(root_dir, json_path, train_dataset, image_subdir, labels_
     train_split = int(len(data['images']) * 0.9)
     test_split = int(len(test_data['images']))
     print('{} train split '.format(train_dataset), train_split)
-    print('{} val split '.format(train_dataset),  int(len(data['images']) * 0.1))
+    print('{} val split '.format(train_dataset), int(len(data['images']) * 0.1))
     print('{} test split '.format(test_dataset), test_split)
     image_idx_list = list(range(0, len(data['images'])))
     test_image_idx_list = list(range(0, len(test_data['images'])))
-    train_imgs = random.sample(image_idx_list, train_split) # Samples without replacement
+    train_imgs = random.sample(image_idx_list, train_split)  # Samples without replacement
     test_idx_list = list(test_image_idx_list)
     test_imgs = random.sample(test_idx_list, test_split)
     val_imgs = list(set(image_idx_list) - set(train_imgs))
@@ -114,7 +116,7 @@ def create_input_files(root_dir, json_path, train_dataset, image_subdir, labels_
         if (context != "none") and (len(contexts) == 0):
             continue
 
-        path = os.path.join(root_dir, train_dataset, image_subdir, img['filename']) #TODO: fix path
+        path = os.path.join(root_dir, train_dataset, image_subdir, img['filename'])  # TODO: fix path
 
         if idx in train_imgs:
             train_image_paths.append(path)
@@ -153,7 +155,7 @@ def create_input_files(root_dir, json_path, train_dataset, image_subdir, labels_
         if (context != "none") and (len(contexts) == 0):
             continue
 
-        path = os.path.join(root_dir, test_dataset, image_subdir, img['filename']) #TODO: fix path
+        path = os.path.join(root_dir, test_dataset, image_subdir, img['filename'])  # TODO: fix path
 
         if idx in test_imgs:
             test_image_paths.append(path)
@@ -194,7 +196,7 @@ def create_input_files(root_dir, json_path, train_dataset, image_subdir, labels_
     for impaths, imlabs, imcontexts, split in [
         (train_image_paths, train_image_labels, train_image_contexts, 'TRAIN'),
         (val_image_paths, val_image_labels, val_image_contexts, 'VAL'),
-            (test_image_paths, test_image_labels, test_image_contexts, 'TEST')]:
+        (test_image_paths, test_image_labels, test_image_contexts, 'TEST')]:
 
         with h5py.File(os.path.join(root_dir, output_folder, split + '_IMAGES_' + base_filename + '.hdf5'), 'a') as h:
             # Make a note of the number of labels we are sampling per image
@@ -210,7 +212,7 @@ def create_input_files(root_dir, json_path, train_dataset, image_subdir, labels_
             lablens = []
             enc_contexts = []
             contextlens = []
-
+            unread_images = 0
             for i, path in enumerate(tqdm(impaths)):
                 # Sample labels
                 if len(imlabs[i]) <= labels_per_image:
@@ -260,19 +262,18 @@ def create_input_files(root_dir, json_path, train_dataset, image_subdir, labels_
 
                         enc_contexts.append(enc_d)
                 except Exception as e:
+                    unread_images += 1
                     print("Error reading image: ", impaths[i])
                     print(e)
                     continue
 
             # Sanity check
-            print(images.shape[0])
+            print(images.shape[0] - unread_images)
             print(labels_per_image)
             print(len(enc_labels))
             print(len(lablens))
 
-
-            assert images.shape[0] * \
-                labels_per_image == len(enc_labels) == len(lablens)
+            assert images.shape[0] - unread_images * labels_per_image == len(enc_labels) == len(lablens)
 
             # Save encoded labels and their lengths to JSON files
             with open(os.path.join(root_dir, output_folder, split + '_LABELS_' + base_filename + '.json'), 'w') as j:
@@ -282,7 +283,8 @@ def create_input_files(root_dir, json_path, train_dataset, image_subdir, labels_
                 json.dump(lablens, j)
 
             if context != "none":
-                with open(os.path.join(root_dir, output_folder, split + '_CONTEXTS_' + base_filename + '.json'), 'w') as j:
+                with open(os.path.join(root_dir, output_folder, split + '_CONTEXTS_' + base_filename + '.json'),
+                          'w') as j:
                     json.dump(enc_contexts, j)
 
 
@@ -378,7 +380,6 @@ def save_checkpoint(checkpoint_dir, epoch, epochs_since_improvement, encoder, de
 
 
 def write_csv(time_dir, label_cond, context_cond, randomized, blank_img, blank_context, split, epoch, metrics_dict):
-
     file_path = os.path.join(time_dir, 'data.csv')
 
     data = {
