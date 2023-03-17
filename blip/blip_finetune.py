@@ -1,5 +1,5 @@
 from transformers import AutoProcessor, AutoModelForCausalLM, TrainingArguments, Trainer, BlipForConditionalGeneration, BlipTextConfig, BlipVisionConfig, BlipConfig
-from datasets import load_dataset, Image
+from datasets import load_dataset, concatenate_datasets, Image
 import requests
 from PIL import Image
 import torch
@@ -41,15 +41,25 @@ def transforms(examples):
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 
-images_path = '../datasets/pew/imgs'
+statista_images_path = '../datasets/statista/imgs'
+pew_images_path = '../datasets/pew/imgs'
+hci_images_path = '../datasets/hci/imgs'
+concadia_images_path = '../datasets/concadia/imgs'
 
-dataset = load_dataset("imagefolder", data_dir=images_path, split="train")
+statista_dataset = load_dataset("imagefolder", data_dir=statista_images_path, split="train")
+pew_dataset = load_dataset("imagefolder", data_dir=pew_images_path, split="train")
+hci_dataset = load_dataset("imagefolder", data_dir=hci_images_path, split="train")
+concadia_dataset = load_dataset("imagefolder", data_dir=concadia_images_path, split="train")
+
+test_dataset = concatenate_datasets([pew_dataset, hci_dataset, concadia_dataset])
+
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-dataset = dataset.map(transforms, batched=True)
+statista_dataset = statista_dataset.map(transforms, batched=True)
+test_dataset = test_dataset.map(transforms, batched=True)
 
-train_dataset = dataset.filter(lambda example: example["split"] == "train")
-valid_dataset = dataset.filter(lambda example: example["split"] == "val")
-test_dataset = dataset.filter(lambda example: example["split"] == "test")
+train_dataset = statista_dataset.filter(lambda example: example["split"] == "train")
+valid_dataset = statista_dataset.filter(lambda example: example["split"] == "val")
+#test_dataset = dataset.filter(lambda example: example["split"] == "test")
 
 print("Length of train dataset ", len(train_dataset))
 print("Length of val dataset ", len(valid_dataset))
@@ -110,6 +120,8 @@ train_dataset = ContextDataset(train_dataset, feature_extractor)
 valid_dataset = ContextDataset(valid_dataset, feature_extractor)
 
 train_dataset = [image for image in train_dataset if image['input_ids'].shape[0] == 1024]
+valid_dataset = [image for image in valid_dataset if image['input_ids'].shape[0] == 1024]
+#test_dataset = [image for image in test_dataset if image['input_ids'].shape[0] == 1024]
 #train_dataset = train_dataset.filter(lambda example: example["input_ids"].shape[0] > 1024)
 
 train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=4)
@@ -131,9 +143,12 @@ model.train()
         print("Input IDS shape ", input_ids.shape[1])
    ''' 
 
-for epoch in range(3):
+for epoch in range(1):
     print("Epoch:", epoch)
     for idx, batch in enumerate(train_dataloader):
+        if (idx % 100 == 0):
+            print("On " + str(epoch) + " epoch and " + str(idx) + " iteration")
+
         #print("Idx ", idx)
        # print("Batch ", batch)
         input_ids = batch.pop("input_ids").to(device)
@@ -155,7 +170,7 @@ for epoch in range(3):
     
         loss = outputs.loss
 
-        print("Loss:", loss.item())
+#        print("Loss:", loss.item())
 
         loss.backward()
 
@@ -164,20 +179,22 @@ for epoch in range(3):
 
 # prepare image for the model
 # load image
-example = valid_dataset[10]
-image = example["image"]
+#example = valid_dataset[10]
+#image = example["image"]
 
-inputs = feature_extractor(images=image, return_tensors="pt").to(device)
-pixel_values = inputs.pixel_values
+#inputs = feature_extractor(images=image, return_tensors="pt").to(device)
+#pixel_values = inputs.pixel_values
 
-generated_ids = model.generate(pixel_values=pixel_values, max_length=50)
-generated_caption = feature_extractor.batch_decode(generated_ids, skip_special_tokens=True)[0]
-print("Generated caption ", generated_caption)
+#generated_ids = model.generate(pixel_values=pixel_values, max_length=50)
+#generated_caption = feature_extractor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+#print("Generated caption ", generated_caption)
 
-fig = plt.figure(figsize=(18, 14))
+#fig = plt.figure(figsize=(18, 14))
 
 hypotheses = []
 refs = []
+
+#test_dataset = [image for image in test_dataset if image['input_ids'].shape[0] == 1024]
 
 for i, example in enumerate(test_dataset):
   image = example["image"]

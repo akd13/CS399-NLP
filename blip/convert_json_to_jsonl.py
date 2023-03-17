@@ -1,7 +1,7 @@
 import json
 
-images_path = '../datasets/pew/'
-with open(images_path + 'pew_remove_unicode.json', 'r') as f:
+images_path = '../datasets/hci/'
+with open(images_path + 'hci.json', 'r') as f:
     json_data = json.load(f)
     
 with open(images_path + 'imgs/metadata.jsonl', 'w') as outfile:
