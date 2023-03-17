@@ -2,7 +2,8 @@
 python3 create_input_files.py --context context --root_dir ../../../datasets/ --dataset statista --test_dataset pew
 python3 create_input_files.py --context none --root_dir ../../../datasets/ --dataset statista --test_dataset pew
 2. Train model
-python3 train.py --image_encoder_type densenet --context_encoder_type roberta description context none --epochs 10 --blank_context --dataset concadia --attention_type multiplicative
+python3 train.py --image_encoder_type densenet --context_encoder_type roberta description context none --epochs 30 --blank_context --dataset statista --attention_type multiplicative
+python3 train.py --image_encoder_type densenet --context_encoder_type roberta description context none --epochs 30 --dataset statista --attention_type multiplicative
 3. Test model
 python3 test_eval_beamsearch.py --data_dir ../../../datasets --runs_dir . --wandb_project 4akd13/concadia --train_dataset concadia --test_dataset hci
 4. Beamsearch
