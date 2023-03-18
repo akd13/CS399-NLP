@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 from matplotlib import pyplot as plt
 import seaborn as sns
 
-
 context_densenet = pd.read_csv('results/context_densenet.csv')
 context_resnet = pd.read_csv('results/context_resnet.csv')
 no_context_resnet = pd.read_csv('results/no_context_resnet.csv')
