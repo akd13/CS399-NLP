@@ -597,7 +597,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Data parameters
-    data_folder = os.path.join(args.data_dir, args.context_cond +
+    if args.blank_context:
+        data_folder = os.path.join(args.data_dir, 'none' +
+                               args.dataset)
+    else:
+        data_folder = os.path.join(args.data_dir, args.context_cond +
                                args.dataset)  # folder with data files saved by create_input_files.py
     data_name = '{}_1_min_word_freq'.format(args.dataset)  # base name shared by data files
 

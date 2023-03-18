@@ -343,6 +343,7 @@ class DecoderWithContextRevised(nn.Module):
                 (h[:batch_size_t], c[:batch_size_t]))  # (batch_size_t, decoder_dim)
             preds = self.fc(self.dropout(h))  # (batch_size_t, vocab_size)
             predictions[:batch_size_t, t, :] = preds
+            merged_alpha = torch.narrow(merged_alpha, dim=1, start=0, length=alphas.shape[2])
             alphas[:batch_size_t, t, :] = merged_alpha
             if greedy_decode_from_scratch:
                 # greedily decode
