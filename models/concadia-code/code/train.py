@@ -144,7 +144,7 @@ def run_training():
 
     # Epochs
     for epoch in range(start_epoch, args.epochs):
-
+        print("Num epochs", args.epochs-start_epoch)
         # Decay learning rate if there is no improvement for 8 consecutive epochs, and terminate training after 20
         if epochs_since_improvement == 20:
             break
