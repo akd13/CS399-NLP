@@ -60,7 +60,7 @@ cudnn.benchmark = True
 loss_function = nn.CrossEntropyLoss()
 
 # Training parameters
-batch_size = 16
+batch_size = 32
 workers = 1  # for data-loading; right now, only 1 works with h5py
 encoder_lr = 1e-4  # learning rate for encoder if fine-tuning
 decoder_lr = 4e-4  # learning rate for decoder
