@@ -599,8 +599,7 @@ if __name__ == '__main__':
 
     # Data parameters
     if args.blank_context:
-        data_folder = os.path.join(args.data_dir, 'none' +
-                               args.dataset)
+        data_folder = os.path.join(args.data_dir, 'none' + args.dataset)
     else:
         data_folder = os.path.join(args.data_dir, args.context_cond +
                                args.dataset)  # folder with data files saved by create_input_files.py
