@@ -60,7 +60,6 @@ cudnn.benchmark = True
 loss_function = nn.CrossEntropyLoss()
 
 # Training parameters
-batch_size = 32
 workers = 1  # for data-loading; right now, only 1 works with h5py
 encoder_lr = 1e-4  # learning rate for encoder if fine-tuning
 decoder_lr = 4e-4  # learning rate for decoder
@@ -129,7 +128,7 @@ def run_training():
 
     # Loss function
     criterion = loss_function.to(device)
-
+    batch_size = args.batch_size
     # Custom dataloaders
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
@@ -593,7 +592,9 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', type=str, default='concadia',
                         choices=['hci', 'concadia', 'pew', 'statista','statista-small'],
                         help='Dataset to train on')
-
+    parser.add_argument('--batch_size',
+                        type=int,
+                        default=32)
     args = parser.parse_args()
 
     # Data parameters
@@ -637,7 +638,7 @@ if __name__ == '__main__':
         'device': str(device),
         'cudnn.benchmark': str(cudnn.benchmark),
         'loss_function': str(loss_function),
-        'batch_size': str(batch_size),
+        'batch_size': str(args.batch_size),
         'workers': str(workers),
         'encoder_lr': str(encoder_lr),
         'decoder_lr': str(decoder_lr),
