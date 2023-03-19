@@ -26,4 +26,4 @@ for directory in directories:
     plt.axis("off")
     plt.tight_layout(pad=0)
     plt.show()
-    plt.savefig(os.path.join('wordclouds',f'word_cloud_{directory}.png'))
+    wordcloud.to_file(f"wordclouds/wordcloud_{directory}.png")
