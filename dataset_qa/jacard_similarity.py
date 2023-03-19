@@ -22,7 +22,6 @@ description_caption = []
 description_context = []
 description_caption_context = []
 datasets_sets = {}
-# loop over each dataset
 for dataset in datasets:
     print(f"Dataset: {dataset}")
     data = load_data(dataset)
@@ -54,7 +53,6 @@ for dataset in datasets:
 
 ind = np.arange(len(datasets))
 width = 0.25
-
 fig, ax = plt.subplots()
 rects1 = ax.bar(ind - width, description_caption, width, label='Description To Caption')
 rects2 = ax.bar(ind, description_context, width, label='Description To Context')
@@ -85,7 +83,6 @@ for dataset in datasets:
         print("=====")
         dataset_jaccard_values[dataset] = [desc_desc_jaccard, caption_caption_jaccard, context_context_jaccard, caption_context_jaccard]
 
-# Jaccard similarity values
 hci_values = dataset_jaccard_values['hci']
 pew_values = dataset_jaccard_values['pew']
 concadia_values = dataset_jaccard_values['concadia']
