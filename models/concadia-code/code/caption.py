@@ -290,8 +290,11 @@ def label_image_beam_search(encoder, decoder, image_path, word_map, beam_size=3,
     # Start decoding
     step = 1
 
-    h, c = decoder.init_hidden_state(encoder_out)
+    paragraph_emb = torch.ones(1, 52, 768).to(device)
+    paragraph_emb = paragraph_emb.expand(k, 52, 768)
+    paragraph_emb_flat = paragraph_emb.sum(axis=1)
 
+    h, c, decoder_input = decoder.init_hidden_state(encoder_out, paragraph_emb_flat)
     # s is a number less than or equal to k, because sequences are removed from this process once they hit <end>
     while True:
 
