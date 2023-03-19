@@ -16,7 +16,7 @@ if __name__ == '__main__':
                         required=True,
                         help='the type of text that the model receives as additional context to inform generation')
     parser.add_argument('--dataset', type=str,
-                        choices=['images', 'pew', 'statista', 'concadia', 'hci'],
+                        choices=['images', 'pew', 'statista', 'concadia', 'hci','statista-small'],
                         required=True,
                         help='what should be randomized for a baseline condition')
     parser.add_argument('--root_dir', type=str,
