@@ -243,7 +243,7 @@ def label_image_beam_search(encoder, decoder, image_path, word_map, beam_size=3,
     vocab_size = len(word_map)
 
     # Read image and process
-    img = imageio.imread(image_path)
+    img = imageio.imread(image_path, pilmode='RGB')
     if len(img.shape) == 2:
         img = img[:, :, np.newaxis]
         img = np.concatenate([img, img, img], axis=2)
