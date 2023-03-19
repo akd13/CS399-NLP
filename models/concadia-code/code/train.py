@@ -591,7 +591,7 @@ if __name__ == '__main__':
                         default='.',
                         help="Where to output run metrics and checkpoints")
     parser.add_argument('--dataset', type=str, default='concadia',
-                        choices=['hci', 'concadia', 'pew', 'statista'],
+                        choices=['hci', 'concadia', 'pew', 'statista','statista-small'],
                         help='Dataset to train on')
 
     args = parser.parse_args()
