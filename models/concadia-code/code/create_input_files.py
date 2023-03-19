@@ -25,7 +25,7 @@ if __name__ == '__main__':
                         default="imgs",
                         help='the name of the image subdir within `root_dir` that houses a decompressed version of '
                              '`resized.zip`')
-    parser.add_argument('--test_dataset', type=str,default="pew",choices=['images', 'pew', 'statista', 'concadia', 'hci'],
+    parser.add_argument('--test_dataset', type=str,default="pew",choices=['images', 'pew', 'statista', 'statista-test','concadia', 'hci'],
                         help='what should be the test dataset')
     args = parser.parse_args()
 

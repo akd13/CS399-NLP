@@ -88,7 +88,7 @@ if __name__ == '__main__':
                         choices=['hci', 'statista', 'pew', 'concadia', 'statista-small'],
                         help="Which dataset to use for testing")
     parser.add_argument('--test_dataset', type=str, default='hci',
-                        choices=['hci', 'statista', 'pew', 'concadia', 'statista-small'],
+                        choices=['hci', 'statista', 'pew', 'concadia', 'statista-small','statista-test'],
                         help="Which dataset to use for testing")
     parser.add_argument('--image_subdir', type=str, default='imgs',
                         help="Which image subdir to choose")
