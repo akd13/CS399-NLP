@@ -85,10 +85,10 @@ if __name__ == '__main__':
                         default='/home/ubuntu/s3-drive',
                         help="Where checkpoints from all runs are saved")
     parser.add_argument('--train_dataset', type=str, default='concadia',
-                        choices=['hci', 'statista', 'pew', 'concadia'],
+                        choices=['hci', 'statista', 'pew', 'concadia', 'statista-small'],
                         help="Which dataset to use for testing")
     parser.add_argument('--test_dataset', type=str, default='hci',
-                        choices=['hci', 'statista', 'pew', 'concadia'],
+                        choices=['hci', 'statista', 'pew', 'concadia', 'statista-small'],
                         help="Which dataset to use for testing")
     parser.add_argument('--image_subdir', type=str, default='imgs',
                         help="Which image subdir to choose")
