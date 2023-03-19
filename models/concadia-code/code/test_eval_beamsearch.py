@@ -118,6 +118,7 @@ if __name__ == '__main__':
         run_dir = os.path.join(args.runs_dir, 'runs', run_id)
         # test only the ID that works
         if (not os.path.exists(run_dir)):
+            print("doesnt exist")
             continue
 
         with open(os.path.join(run_dir, 'specs.json'), 'r') as f:
