@@ -141,6 +141,8 @@ if __name__ == '__main__':
                 continue
 
             with open(os.path.join(run_dir, 'specs.json'), 'r') as f:
+                print(f"Loading specs for run {run_id} ...")
+                print(os.path.join(run_dir, 'specs.json'))
                 specs = json.load(f)
             blank_context = specs['blank_context']
             if not isinstance(blank_context, bool):
