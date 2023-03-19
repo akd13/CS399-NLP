@@ -2,13 +2,6 @@ import json
 import os
 from collections import Counter
 
-from scipy.spatial.distance import jaccard
-
-
-# Function to calculate jaccard similarity
-def jaccard_similarity(set1, set2):
-    return 1 - jaccard(set1, set2)
-
 root = '../datasets/'
 directories = ['hci', 'statista', 'pew', 'concadia']
 
@@ -77,24 +70,3 @@ for directory in directories:
     print("Average caption word length: ", avg_cap_word_len)
     print("Average context word length: ", avg_cont_word_len)
     print("Vocab size: ", vocab_size)
-
-    # for other_dir in directories:
-    #     if directory != other_dir:
-    #         other_json_path = os.path.join(root, other_dir, other_dir+'.json')
-    #         with open(other_json_path, 'r') as f:
-    #             other_data = json.load(f)
-    #
-    #         other_desc_counter = Counter()
-    #         other_cap_counter = Counter()
-    #         other_cont_counter = Counter()
-    #         other_vocab_counter = Counter()
-    #
-    #         for img in other_data['images']:
-    #             other_desc = img['description']['raw']
-    #             other_cap = img['caption']['raw']
-    #             other_cont = img['context']['raw']
-    #
-    #             other_desc_tokens = word_tokenize(other_desc.lower())
-    #             other_cap_tokens = word_tokenize(other_cap.lower())
-    #             other_cont_tokens = word_tokenize(other_cont.lower())
-
