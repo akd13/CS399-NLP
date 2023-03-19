@@ -122,6 +122,8 @@ if __name__ == '__main__':
 
         with open(os.path.join(run_dir, 'specs.json'), 'r') as f:
             specs = json.load(f)
+            print(os.path.join(run_dir, 'specs.json'))
+            specs = json.load(f)
         data_location = specs['data_folder'].replace("../../../../../..", "")
         if data_location not in runs_by_data_location: runs_by_data_location[data_location] = []
         runs_by_data_location[data_location].append(
