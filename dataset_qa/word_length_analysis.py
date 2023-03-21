@@ -3,7 +3,7 @@ import os
 from collections import Counter
 
 root = '../datasets/'
-directories = ['hci', 'statista', 'pew', 'concadia']
+directories = ['statista', 'pew', 'hci','concadia']
 
 for directory in directories:
     json_path = os.path.join(root,directory, directory+'.json')
