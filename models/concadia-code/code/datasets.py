@@ -70,7 +70,7 @@ class LabelDataset(Dataset):
         else:
             context = []
 
-        if self.split is 'TRAIN':
+        if self.split == 'TRAIN':
             return img, label, lablen, context
         else:
             # For validation of testing, also return all 'labels_per_image' labels to find BLEU-4 score

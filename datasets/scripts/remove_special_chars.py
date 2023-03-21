@@ -2,7 +2,7 @@ import re
 import json
 from unicode_to_ascii import unicode_to_ascii
 from nltk.tokenize import word_tokenize
-
+import os
 root = 'datasets/'
 filenames = ['hci/hci.json','concadia/concadia.json',
              'pew/pew.json','statista/statista.json']
@@ -27,5 +27,6 @@ for f in filenames:
         image['caption']['tokens'] = word_tokenize(image['caption']['raw'])
         image['description']['tokens'] = word_tokenize(image['description']['raw'])
         image['context']['tokens'] = word_tokenize(image['context']['raw'])
-    with open(file.split('.')[0]+'_remove_unicode.json', 'w', encoding='utf-8') as f_new:
+    os.system('rm '+file.split('.')[0]+'_remove_unicode.json')
+    with open(file, 'w', encoding='utf-8') as f_new:
         json.dump(input_text, f_new, ensure_ascii=False)

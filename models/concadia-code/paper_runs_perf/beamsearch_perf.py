@@ -1,7 +1,8 @@
-import pandas as pd
-import os
-from nlgeval import NLGEval
 import csv
+import os
+
+import pandas as pd
+from nlgeval import NLGEval
 
 nlgeval = NLGEval(metrics_to_omit=['SkipThoughtCS', 'EmbeddingAverageCosineSimilarity', 
                                     'EmbeddingAverageCosineSimilairty', 'VectorExtremaCosineSimilarity', 
@@ -13,9 +14,6 @@ csv_full = [['label_cond', 'context_cond', 'randomized', 'nlg_type', 'context_en
 
 for subdir in os.listdir('.'):
     if not os.path.isdir(subdir):
-        continue
-    print(subdir)
-    if subdir!='description_none_none_densenet-lstm_none':
         continue
     label_cond, context_cond, randomized, nlg_type, context_encoder_type = subdir.split('_')
     for fp in os.listdir(subdir):

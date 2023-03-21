@@ -29,4 +29,11 @@ The datasets are collected from the following sources:
 4. Chart-to-Text - Download `chart-to-text-dataset.zip` from https://github.com/vis-nlp/Chart-to-text
     1. Statista
     2. Pew
-
+## Formatting the Data
+1. Navigate to inside the project, and `cd models/concadia-code/code`
+2. To create embeddings, ensure that your dataset has all images inside directory `images` and has the metadata in 
+`images.json`, then do the following - 
+    3. No Context` python3 create_input_files.py none --dataset <dataset> --root_dir ../../../datasets`
+    4. Context `python3 create_input_files.py context --dataset <dataset> --root_dir ../../../datasets` 
+5. To train the model, do the following - 
+    6. No context `python3 train.py --image_encoder_type densenet --context_encoder_type roberta description context none --epochs 10 --blank_context`

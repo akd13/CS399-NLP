@@ -1,22 +1,16 @@
-import torch
-import torch.nn.functional as F
-import numpy as np
-import json
-import torchvision.transforms as transforms
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-import skimage.transform
 import argparse
-import imageio
-from imageio import imread
-from PIL import Image
-from utils import *
-from nlgeval import NLGEval
-from torch import nn
-from datasets import *
-from transformers import BertTokenizer
-
 import os
+
+import imageio
+import matplotlib.cm as cm
+import matplotlib.pyplot as plt
+import skimage.transform
+import torch.nn.functional as F
+import torchvision.transforms as transforms
+from torch import nn
+
+from datasets import *
+from utils import *
 
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
@@ -249,7 +243,7 @@ def label_image_beam_search(encoder, decoder, image_path, word_map, beam_size=3,
     vocab_size = len(word_map)
 
     # Read image and process
-    img = imageio.imread(image_path)
+    img = imageio.imread(image_path, pilmode='RGB')
     if len(img.shape) == 2:
         img = img[:, :, np.newaxis]
         img = np.concatenate([img, img, img], axis=2)
@@ -296,8 +290,11 @@ def label_image_beam_search(encoder, decoder, image_path, word_map, beam_size=3,
     # Start decoding
     step = 1
 
-    h, c = decoder.init_hidden_state(encoder_out)
+    paragraph_emb = torch.ones(1, 52, 768).to(device)
+    paragraph_emb = paragraph_emb.expand(k, 52, 768)
+    paragraph_emb_flat = paragraph_emb.sum(axis=1)
 
+    h, c, decoder_input = decoder.init_hidden_state(encoder_out, paragraph_emb_flat)
     # s is a number less than or equal to k, because sequences are removed from this process once they hit <end>
     while True:
 

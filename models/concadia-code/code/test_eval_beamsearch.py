@@ -1,20 +1,18 @@
-import json
-import random
 import argparse
-from PIL import Image
-from PIL import ImageFont
-from PIL import ImageDraw 
-import os
-import caption
-import torch
-import matplotlib.patches as patches
 import csv
-from transformers import AutoTokenizer
-from tqdm import tqdm
+import json
+import os
 
+import torch
 import wandb
+from tqdm import tqdm
+from transformers import AutoTokenizer
 
-def sample_output(run_id, data, checkpoint_path, label, context, nlg_type, context_encoder_type, blank_context, randomized, beam_size=5):
+import caption
+
+
+def sample_output(run_id, data, checkpoint_path, label, context, nlg_type, context_encoder_type, blank_context,
+                  randomized, beam_size=5):
     try:
         checkpoint = torch.load(checkpoint_path, map_location=str(device))
         decoder = checkpoint['decoder']
@@ -27,8 +25,8 @@ def sample_output(run_id, data, checkpoint_path, label, context, nlg_type, conte
         print("Error occurred in loading checkpoint: " + error_msg)
         return
 
-
-    output_dir = os.path.join('../paper_runs_perf', f"{label}_{'none' if blank_context else context}_{randomized}_{nlg_type}_{context_encoder_type}")
+    output_dir = os.path.join('../paper_runs_perf',
+                              f"{label}_{'none' if blank_context else context}_{randomized}_{nlg_type}_{context_encoder_type}")
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -45,25 +43,30 @@ def sample_output(run_id, data, checkpoint_path, label, context, nlg_type, conte
 
         # Generating model output
         try:
-            image_fn = os.path.join(args.data_dir,  img_data['filename'])
-            if context == "none": # should not be executed
-                seq, _ = caption.label_image_beam_search(encoder, decoder, image_fn, word_map, beam_size, gpu_id=args.gpu_id)
+            image_fn = os.path.join(args.data_dir, args.test_dataset, args.image_subdir, img_data['filename'])
+            if context == "none":  # should not be executed
+                seq, _ = caption.label_image_beam_search(encoder, decoder, image_fn, word_map, beam_size,
+                                                         gpu_id=args.gpu_id)
             else:
-                seq = caption.labelwcontext_image_beam_search(encoder, decoder, context_tokenizer, image_fn, img_data[context]['raw'], word_map, blank_context, beam_size, gpu_id=args.gpu_id)
+                seq = caption.labelwcontext_image_beam_search(encoder, decoder, context_tokenizer, image_fn,
+                                                              img_data[context]['raw'], word_map, blank_context,
+                                                              beam_size, gpu_id=args.gpu_id)
             # generated label
             generated_label = " ".join([rev_word_map[ind] for ind in seq])
             generated_label = generated_label.replace('<start> ', '')
             generated_label = generated_label.replace(' <end>', '')
-            sample = [run_id, beam_size, img_data['filename'], raw_label, img_data[context]['raw'], generated_label]
+            sample = [run_id, args.train_dataset, args.test_dataset, beam_size, img_data['filename'], raw_label, img_data[context]['raw'], generated_label]
             beamsearch_perf.append(sample)
+            print("Label {}".format(generated_label))
         except Exception as error_msg:
             print("An exception occurred.")
             print(error_msg)
 
-    filename = os.path.join(output_dir, f"{run_id}.csv")
+    run_id_dataset = run_id+ "_" + args.train_dataset+"_"+args.test_dataset
+    filename = os.path.join(output_dir, f"{run_id_dataset}.csv")
 
-    with open(filename, 'w') as csvfile: 
-        csvwriter = csv.writer(csvfile) 
+    with open(filename, 'w') as csvfile:
+        csvwriter = csv.writer(csvfile)
         csvwriter.writerows(beamsearch_perf)
 
 
@@ -81,24 +84,30 @@ if __name__ == '__main__':
     parser.add_argument('--runs_dir', type=str,
                         default='/home/ubuntu/s3-drive',
                         help="Where checkpoints from all runs are saved")
+    parser.add_argument('--train_dataset', type=str, default='concadia',
+                        choices=['hci', 'statista', 'pew', 'concadia', 'statista-small'],
+                        help="Which dataset to use for testing")
+    parser.add_argument('--test_dataset', type=str, default='hci',
+                        choices=['hci', 'statista', 'pew', 'concadia', 'statista-small','statista-test'],
+                        help="Which dataset to use for testing")
+    parser.add_argument('--image_subdir', type=str, default='imgs',
+                        help="Which image subdir to choose")
     parser.add_argument('--wandb_project', type=str, required=True,
                         help="The wandb project where all runs are tracked, of the format '<user_name>/concadia'")
-
     args = parser.parse_args()
     print(args)
 
     # Load data
     print("Loading data ...")
-    with open(os.path.join(args.data_dir,'images.json'), 'r') as json_file:
+    with open(os.path.join(args.data_dir, args.test_dataset, args.test_dataset + '.json'), 'r') as json_file:
         data = json.load(json_file)
-    datapoints = data['images']
-    data = [dp for dp in datapoints if dp['split'] == 'test']
+    data = data['images']
     if args.debug:
         data = data[:2]
     print("Num testing examples: " + str(len(data)))
 
     device = torch.device("cuda:" + args.gpu_id if torch.cuda.is_available() else "cpu")
-    os.environ['KMP_DUPLICATE_LIB_OK']='True'
+    os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
     api = wandb.Api()
     runs = api.runs(args.wandb_project)
@@ -107,7 +116,8 @@ if __name__ == '__main__':
         if run.config['nlg_type'] not in {'resnet-lstm', 'densenet-lstm'}: continue
         run_id = run.name
         run_dir = os.path.join(args.runs_dir, 'runs', run_id)
- # test only the ID that works
+        print("Run dir",run_dir)
+        # test only the ID that works
         if (not os.path.exists(run_dir)):
             continue
 
@@ -116,15 +126,18 @@ if __name__ == '__main__':
             continue
         with open(os.path.join(run_dir, 'specs.json'), 'r') as f:
             specs = json.load(f)
-        data_location = specs['data_folder'].replace("../../../../../..","")
+            specs = json.load(f)
+            print(os.path.join(run_dir, 'specs.json'))
+            specs = json.load(f)
+        data_location = specs['data_folder'].replace("../../../../../..", "")
         if data_location not in runs_by_data_location: runs_by_data_location[data_location] = []
-        runs_by_data_location[data_location].append((run_id, run.config['nlg_type'], run.config['context_encoder_type']))
+        runs_by_data_location[data_location].append(
+            (run_id, run.config['nlg_type'], run.config['context_encoder_type']))
 
     for data_location, curr_runs in runs_by_data_location.items():
         # Load word map (word2ix)
         print("Loading word map")
-
-        with open(os.path.join(data_location, "WORDMAP_wikipedia_1_min_word_freq.json"), 'r') as j:
+        with open(os.path.join(data_location, "WORDMAP_{}_1_min_word_freq.json".format(args.train_dataset)), 'r') as j:
             word_map = json.load(j)
         rev_word_map = {v: k for k, v in word_map.items()}  # ix2word
 
@@ -139,6 +152,8 @@ if __name__ == '__main__':
                 continue
 
             with open(os.path.join(run_dir, 'specs.json'), 'r') as f:
+                print(f"Loading specs for run {run_id} ...")
+                print(os.path.join(run_dir, 'specs.json'))
                 specs = json.load(f)
             blank_context = specs['blank_context']
             if not isinstance(blank_context, bool):
@@ -149,7 +164,8 @@ if __name__ == '__main__':
                 if fp.startswith('BEST'):
                     checkpoint_path = os.path.join(checkpoint_dir, fp)
 
-            # Sample output
+                    # Sample output
                     print(f"Sampling output for checkpoint {checkpoint_path} ...")
 
-                    sample_output(run_id, data, checkpoint_path, specs['label_cond'], specs['context_cond'], nlg_type, context_encoder_type, blank_context, specs['randomized'], beam_size=args.beam_size)
+                    sample_output(run_id, data, checkpoint_path, specs['label_cond'], specs['context_cond'], nlg_type,
+                                  context_encoder_type, blank_context, specs['randomized'], beam_size=args.beam_size)
