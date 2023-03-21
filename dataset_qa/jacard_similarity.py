@@ -108,9 +108,9 @@ statista = datasets_sets['statista']
 dataset_jaccard_values = {}
 for dataset in datasets:
     if dataset != 'statista':
-        ctx_desc_jaccard = 10*jaccard(statista['ctx'], datasets_sets[dataset]['desc'])
-        ctx_caption_jaccard = 10*jaccard(statista['ctx'], datasets_sets[dataset]['cap'])
-        ctx_context_jaccard = 10*jaccard(statista['ctx'], datasets_sets[dataset]['ctx'])
+        ctx_desc_jaccard = jaccard(statista['ctx'], datasets_sets[dataset]['desc'])
+        ctx_caption_jaccard = jaccard(statista['ctx'], datasets_sets[dataset]['cap'])
+        ctx_context_jaccard = jaccard(statista['ctx'], datasets_sets[dataset]['ctx'])
         print(f"Jaccard similarity between statista and {dataset} description: {ctx_desc_jaccard:.4f}")
         print(f"Jaccard similarity between statista and {dataset} caption: {ctx_caption_jaccard:.4f}")
         print(f"Jaccard similarity between statista and {dataset} context: {ctx_context_jaccard:.4f}")
