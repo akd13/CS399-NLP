@@ -108,9 +108,9 @@ statista = datasets_sets['statista']
 dataset_jaccard_values = {}
 for dataset in datasets:
     if dataset != 'statista':
-        ctx_desc_jaccard = jaccard(statista['ctx'], datasets_sets[dataset]['desc'])
-        ctx_caption_jaccard = jaccard(statista['ctx'], datasets_sets[dataset]['cap'])
-        ctx_context_jaccard = jaccard(statista['ctx'], datasets_sets[dataset]['ctx'])
+        ctx_desc_jaccard = 10*jaccard(statista['ctx'], datasets_sets[dataset]['desc'])
+        ctx_caption_jaccard = 10*jaccard(statista['ctx'], datasets_sets[dataset]['cap'])
+        ctx_context_jaccard = 10*jaccard(statista['ctx'], datasets_sets[dataset]['ctx'])
         print(f"Jaccard similarity between statista and {dataset} description: {ctx_desc_jaccard:.4f}")
         print(f"Jaccard similarity between statista and {dataset} caption: {ctx_caption_jaccard:.4f}")
         print(f"Jaccard similarity between statista and {dataset} context: {ctx_context_jaccard:.4f}")
@@ -136,3 +136,37 @@ ax.set_title('Jaccard Similarity between Statista\'s Context and test datasets')
 ax.legend()
 # plt.show()
 plt.savefig('jaccard/jaccard_similarity_statista_context_others.png')
+
+# Compute jaccard similarity between context of pew and other datasets
+pew = datasets_sets['pew']
+dataset_jaccard_values = {}
+for dataset in datasets:
+    if dataset != 'pew':
+        ctx_desc_jaccard = jaccard(pew['ctx'], datasets_sets[dataset]['desc'])
+        ctx_caption_jaccard = jaccard(pew['ctx'], datasets_sets[dataset]['cap'])
+        ctx_context_jaccard = jaccard(pew['ctx'], datasets_sets[dataset]['ctx'])
+        print(f"Jaccard similarity between pew and {dataset} description: {ctx_desc_jaccard:.4f}")
+        print(f"Jaccard similarity between pew and {dataset} caption: {ctx_caption_jaccard:.4f}")
+        print(f"Jaccard similarity between pew and {dataset} context: {ctx_context_jaccard:.4f}")
+        print("=====")
+        dataset_jaccard_values[dataset] = [ctx_desc_jaccard, ctx_caption_jaccard, ctx_context_jaccard]
+
+hci_values = dataset_jaccard_values['hci']
+statista_values = dataset_jaccard_values['statista']
+concadia_values = dataset_jaccard_values['concadia']
+
+# Bar plot
+x_labels = ['Description', 'Caption', 'Context']
+x = range(len(x_labels))
+width = 0.2
+fig, ax = plt.subplots()
+ax.bar([i-width for i in x], hci_values, width, label='HCI')
+ax.bar(x, pew_values, width, label='Statista')
+ax.bar([i+width for i in x], concadia_values, width, label='Concadia')
+ax.set_xticks(x)
+ax.set_xticklabels(x_labels)
+ax.set_ylabel('Jaccard Similarity')
+ax.set_title('Jaccard Similarity between Pew\'s Context and test datasets')
+ax.legend()
+# plt.show()
+plt.savefig('jaccard/jaccard_similarity_pew_context_others.png')
